@@ -1,0 +1,3943 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Portal — PAWDROP</title>
+  
+  <!-- Font Setup -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind & Main Stylesheet hooks -->
+  <link rel="stylesheet" href="/src/css/main.css">
+  <script>try{document.documentElement.setAttribute('data-theme', localStorage.getItem('pawdrop_theme') || 'dark');}catch(e){document.documentElement.setAttribute('data-theme', 'dark');}</script>
+  
+  <!-- GSAP for counting and visual staggers -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+  <style>
+    :root {
+      --black: #111112;
+      --black-2: #18181a;
+      --black-3: #0d0d0e;
+      --neon: #D2FF00;
+      --neon-hover: #b8de00;
+      --white: #ffffff;
+      --gray: #888888;
+      --border: rgba(255, 255, 255, 0.08);
+      --green: #00FF88;
+      --blue: #00D4FF;
+      --red: #FF4444;
+      --orange: #FF8800;
+      --font-display: 'Syne', sans-serif;
+      --font-body: 'DM Sans', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    html[data-theme="light"] {
+      --black: #f4f4f6;
+      --black-2: #ffffff;
+      --black-3: #eaeaea;
+      --neon: #111112;
+      --neon-hover: #333333;
+      --white: #111112;
+      --gray: #5c5c5f;
+      --border: rgba(0, 0, 0, 0.09);
+    }
+
+    html[data-theme="light"] .status-badge.processing { background-color: #fef08a !important; color: #854d0e !important; }
+    html[data-theme="light"] .status-badge.pending { background-color: #e4e4e7 !important; color: #52525b !important; }
+    html[data-theme="light"] .status-badge.shipped { background-color: #dbeafe !important; color: #1e40af !important; }
+    html[data-theme="light"] .status-badge.delivered { background-color: #dcfce7 !important; color: #15803d !important; }
+    html[data-theme="light"] .status-badge.canceled,
+    html[data-theme="light"] .status-badge.cancelled { background-color: #fee2e2 !important; color: #991b1b !important; }
+    html[data-theme="light"] .status-badge.manual_review { background-color: #ffedd5 !important; color: #9a3412 !important; }
+    html[data-theme="light"] .input-field { background-color: #ffffff !important; border: 1px solid rgba(0,0,0,0.12) !important; color: #111112 !important; }
+    html[data-theme="light"] .feed-item { background-color: #ffffff !important; border-left-color: #111112 !important; }
+    html[data-theme="light"] ::-webkit-scrollbar-track { background: #f4f4f6; }
+    html[data-theme="light"] ::-webkit-scrollbar-thumb { background: #d4d4d8; }
+    html[data-theme="light"] ::-webkit-scrollbar-thumb:hover { background: #a1a1aa; }
+    html[data-theme="light"] .outline-btn:hover { background-color: #111112 !important; color: #ffffff !important; }
+    html[data-theme="light"] .chart-container,
+    html[data-theme="light"] .table-container,
+    html[data-theme="light"] .feed-card {
+      background-color: #ffffff !important;
+    }
+
+    body {
+      background-color: var(--black) !important;
+      color: var(--white) !important;
+      font-family: var(--font-body), sans-serif !important;
+      min-height: 100vh;
+      overflow-x: hidden;
+      margin: 0;
+    }
+
+    /* SCROLLBAR */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--black-3); }
+    ::-webkit-scrollbar-thumb { background: #222224; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #333336; }
+
+    /* LAYOUT SIZES */
+    .top-navbar {
+      height: 60px;
+      background-color: var(--black);
+      border-bottom: 1px solid var(--border);
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 24px;
+    }
+
+    .sidebar {
+      width: 240px;
+      background-color: var(--black-3);
+      border-right: 1px solid var(--border);
+      position: fixed;
+      top: 60px;
+      left: 0;
+      bottom: 0;
+      z-index: 90;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 16px 0;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .main-content {
+      margin-left: 240px;
+      margin-top: 60px;
+      padding: 32px;
+      background-color: var(--black);
+      min-height: calc(100vh - 60px);
+      transition: opacity 0.25s ease;
+    }
+
+    /* NAVIGATION ITEMS */
+    .sidebar-menu {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 0 8px;
+    }
+
+    .sidebar-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      color: var(--gray);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      border-radius: 4px;
+      border-left: 3px solid transparent;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+
+    .sidebar-item:hover {
+      background-color: var(--black-2);
+      color: var(--neon);
+    }
+
+    .sidebar-item.active {
+      background-color: var(--black-2);
+      color: var(--neon);
+      border-left-color: var(--neon);
+    }
+
+    /* PAGE STYLING */
+    .page-view {
+      display: none;
+    }
+    .page-view.active {
+      display: block;
+    }
+
+    /* STATS CARDS */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin-bottom: 32px;
+    }
+
+    .stat-card {
+      background-color: var(--black-2);
+      border: 1px solid var(--border);
+      border-top: 1px solid var(--border);
+      padding: 24px;
+      border-radius: 4px;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+    }
+
+    .stat-card:hover {
+      border-top: 2px solid var(--neon);
+      transform: translateY(-2px);
+    }
+
+    .stat-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--gray);
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-family: var(--font-mono);
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--white);
+      line-height: 1.2;
+    }
+
+    .stat-value.neon {
+      color: var(--neon);
+    }
+
+    .stat-sub {
+      font-size: 12px;
+      color: #555558;
+      margin-top: 8px;
+    }
+
+    /* TABLE DESIGN */
+    .table-container {
+      background-color: var(--black-2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      width: 100%;
+    }
+
+    .table-header-panel {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .table-title {
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+    }
+
+    .admin-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    .admin-table th {
+      padding: 14px 24px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--gray);
+      border-bottom: 1px solid var(--border);
+      font-weight: 600;
+    }
+
+    .admin-table td {
+      padding: 16px 24px;
+      font-size: 13px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    .admin-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* BADGES */
+    .status-badge {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      padding: 4px 10px;
+      text-transform: uppercase;
+      border-radius: 2px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .status-badge.pending { background-color: rgba(136, 136, 136, 0.15); color: #aaaaaa; }
+    .status-badge.processing { background-color: var(--neon); color: #000000; }
+    .status-badge.shipped { background-color: var(--blue); color: #000000; }
+    .status-badge.delivered { background-color: var(--green); color: #000000; }
+    .status-badge.canceled,
+    .status-badge.cancelled { background-color: #ef4444; color: #ffffff; }
+    .status-badge.manual_review { background-color: var(--orange); color: #000000; }
+
+    /* ACTION BUTTONS */
+    .action-btn-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    .outline-btn {
+      background: transparent;
+      border: 1px solid var(--neon);
+      color: var(--neon);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 6px 12px;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .outline-btn:hover {
+      background-color: var(--neon);
+      color: #000000;
+    }
+
+    /* LIVE FEED */
+    .live-feed-card {
+      background-color: var(--black-2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      height: 100%;
+    }
+
+    .live-feed-items {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-height: 400px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .feed-item {
+      border-left: 2px solid var(--neon);
+      background-color: #121213;
+      padding: 12px 16px;
+      border-radius: 0 4px 4px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes slideInRight {
+      from { opacity: 0; transform: translateX(12px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .feed-text { font-size: 13px; font-weight: 500; }
+    .feed-time { font-size: 11px; color: var(--gray); font-family: var(--font-mono); }
+
+    /* RED/GREEN DOTS */
+    .online-indicator {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      background-color: var(--green);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--green);
+      animation: blink 2s infinite ease-in-out;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.15); }
+    }
+
+    /* DETAIL DRAWER */
+    .drawer-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 2000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .drawer-overlay.active { opacity: 1; pointer-events: auto; }
+
+    .drawer {
+      position: fixed;
+      top: 0; right: -420px; bottom: 0;
+      width: 420px;
+      background-color: var(--black-2);
+      border-left: 1px solid var(--border);
+      z-index: 2100;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      overflow-y: auto;
+    }
+
+    .drawer.active { right: 0; }
+
+    /* TOAST */
+    .toast-container {
+      position: fixed;
+      top: 24px; right: 24px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .toast {
+      background-color: rgb(24, 24, 26);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--neon);
+      padding: 16px 20px;
+      border-radius: 4px;
+      color: var(--white);
+      font-size: 13px;
+      font-weight: 500;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      animation: toastSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes toastSlideIn {
+      from { transform: translateY(-20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* LOGIN OVERLAY */
+    #adminLoginOverlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(9, 10, 11, 0.99);
+      backdrop-filter: blur(16px);
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .login-card {
+      background-color: var(--black-2);
+      border: 1px solid var(--border);
+      padding: 40px;
+      width: 100%;
+      max-width: 400px;
+      border-radius: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* EXPORT INPUTS & RESPONSIVE GENERALS */
+    .input-field {
+      background-color: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      color: var(--white);
+      font-size: 13px;
+      padding: 10px 14px;
+      border-radius: 4px;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .input-field:focus {
+      border-color: var(--neon);
+      background-color: rgba(255,255,255,0.05);
+    }
+
+    /* HAMBURGER */
+    .menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--white);
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+        top: 60px;
+        bottom: 0;
+        z-index: 1000;
+      }
+      .sidebar.mobile-open {
+        transform: translateX(0);
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 20px;
+      }
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+      }
+      .two-col-layout {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+      }
+      .menu-toggle {
+        display: block;
+      }
+    }
+
+    /* CJ Dropshipping Product Importer custom styles */
+    .importer-tabs {
+      display: flex;
+      gap: 0;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .imp-tab {
+      padding: 12px 24px;
+      font-family: var(--font-display);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      background: none;
+      color: var(--gray);
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .imp-tab.active {
+      color: var(--neon);
+      border-bottom-color: var(--neon);
+    }
+
+    .pid-input-row,
+    .search-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .imp-input {
+      flex: 1;
+      height: 44px;
+      background: var(--black-2);
+      border: 1px solid var(--border);
+      color: var(--white);
+      padding: 0 16px;
+      border-radius: 4px;
+      font-family: var(--font-body);
+      font-size: 14px;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .imp-input:focus {
+      border-color: var(--neon);
+    }
+
+    .btn-fetch {
+      height: 44px;
+      padding: 0 24px;
+      background: var(--neon);
+      color: #111112;
+      font-family: var(--font-display);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    .btn-fetch:hover {
+      background: var(--neon-hover);
+      box-shadow: 0 4px 12px rgba(210,255,0,0.15);
+    }
+
+    .imp-hint {
+      font-size: 11px;
+      color: var(--gray);
+      margin-bottom: 24px;
+    }
+
+    .preview-grid {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 24px;
+      background: var(--black-2);
+      border: 1px solid var(--border);
+      border-top: 2px solid var(--neon);
+      padding: 24px;
+      border-radius: 4px;
+      margin-bottom: 28px;
+    }
+
+    .preview-main-img img {
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      background: var(--black-3);
+      border-radius: 4px;
+    }
+
+    .preview-thumbnails {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+
+    .thumb-img {
+      width: 50px;
+      height: 50px;
+      object-fit: cover;
+      cursor: pointer;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      transition: all 0.2s;
+    }
+
+    .thumb-img:hover {
+      border-color: var(--neon);
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-display);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--gray);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .form-row-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .imp-field {
+      width: 100%;
+      background: var(--black-3);
+      border: 1px solid var(--border);
+      color: var(--white);
+      padding: 10px 14px;
+      font-family: var(--font-body);
+      font-size: 13px;
+      border-radius: 4px;
+      outline: none;
+      box-sizing: border-box;
+      transition: all 0.2s;
+    }
+
+    .imp-field.locked {
+      color: var(--gray);
+      cursor: not-allowed;
+      border-style: dashed;
+    }
+
+    .imp-field.editable {
+      border-color: var(--neon);
+      color: rgba(255, 255, 255, 0.95);
+      font-weight: 700;
+      font-size: 16px;
+    }
+
+    html[data-theme="light"] .imp-field.editable {
+      color: #111112 !important;
+    }
+
+    .imp-select {
+      cursor: pointer;
+    }
+
+    .locked-badge {
+      font-size: 8px;
+      background: var(--border);
+      color: var(--gray);
+      padding: 2px 6px;
+      border-radius: 2px;
+      letter-spacing: 0.05em;
+    }
+
+    .edit-badge {
+      font-size: 8px;
+      background: rgba(210,255,0,0.1);
+      color: var(--neon);
+      padding: 2px 6px;
+      border-radius: 2px;
+      letter-spacing: 0.05em;
+    }
+
+    .profit-calc {
+      background: var(--black-3);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--neon);
+      padding: 12px 16px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+    }
+
+    .profit-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--gray);
+      padding: 3px 0;
+    }
+
+    .profit-total {
+      border-top: 1px solid var(--border);
+      margin-top: 6px;
+      padding-top: 8px;
+      font-family: var(--font-display);
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--white);
+    }
+
+    .profit-margin {
+      font-size: 10px;
+      color: var(--gray);
+      text-align: right;
+      margin-top: 2px;
+    }
+
+    .btn-save {
+      width: 100%;
+      height: 44px;
+      background: var(--neon);
+      color: #111112;
+      font-family: var(--font-display);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-save:hover {
+      background: var(--neon-hover);
+      box-shadow: 0 4px 12px rgba(210,255,0,0.25);
+    }
+
+    .save-status {
+      margin-top: 10px;
+      font-size: 12px;
+      text-align: center;
+      min-height: 18px;
+    }
+
+    .save-status.success { color: var(--green); }
+    .save-status.error   { color: var(--red); }
+
+    .fetch-loading {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 24px;
+      color: var(--gray);
+      background: var(--black-2);
+      border-radius: 4px;
+      margin-bottom: 16px;
+    }
+
+    .fetch-spinner {
+      width: 24px;
+      height: 24px;
+      border: 2px solid var(--border);
+      border-top-color: var(--neon);
+      border-radius: 50%;
+      animation: spin-cj 0.8s linear infinite;
+    }
+
+    @keyframes spin-cj {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .fetch-error {
+      padding: 12px 16px;
+      background: rgba(255,68,68,0.05);
+      border-left: 3px solid var(--red);
+      color: var(--red);
+      font-size: 13px;
+      border-radius: 4px;
+      margin-bottom: 16px;
+    }
+
+    .imported-section {
+      margin-top: 36px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+    }
+
+    .imported-section h3 {
+      font-family: var(--font-display);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--gray);
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    .imported-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+    }
+
+    .imported-card {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      background: var(--black-2);
+      border: 1px solid var(--border);
+      padding: 12px;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+
+    .imported-card:hover {
+      border-color: rgba(210,255,0,0.2);
+    }
+
+    .imported-card img {
+      width: 52px;
+      height: 52px;
+      object-fit: cover;
+      border-radius: 4px;
+      background: var(--black-3);
+    }
+
+    .imported-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .imported-info h4 {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--white);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 2px;
+    }
+
+    .imported-prices {
+      display: flex;
+      gap: 8px;
+      font-size: 11px;
+      margin-bottom: 2px;
+    }
+
+    .cost { color: var(--gray); }
+
+    .imported-profit {
+      font-size: 10px;
+      color: var(--gray);
+    }
+
+    .btn-remove {
+      background: none;
+      border: none;
+      font-size: 14px;
+      cursor: pointer;
+      opacity: 0.5;
+      transition: all 0.2s;
+    }
+
+    .btn-remove:hover { opacity: 1; }
+
+    .search-card {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      background: var(--black-2);
+      border: 1px solid var(--border);
+      padding: 12px;
+      border-radius: 4px;
+      margin-bottom: 8px;
+      transition: all 0.2s;
+    }
+
+    .search-card:hover {
+      border-color: rgba(210,255,0,0.15);
+    }
+
+    .search-card img {
+      width: 64px;
+      height: 64px;
+      object-fit: cover;
+      border-radius: 4px;
+      background: var(--black-3);
+    }
+
+    .search-info {
+      flex: 1;
+    }
+
+    .search-info h4 {
+      font-size: 13px;
+      color: var(--white);
+      margin-bottom: 2px;
+      font-weight: 500;
+    }
+
+    .search-price {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--white);
+      margin-bottom: 2px;
+    }
+
+    .search-pid {
+      font-size: 10px;
+      color: var(--gray);
+    }
+
+    .btn-import {
+      height: 32px;
+      padding: 0 14px;
+      background: transparent;
+      border: 1px solid var(--neon);
+      color: var(--neon);
+      font-family: var(--font-display);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      border-radius: 4px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    .btn-import:hover {
+      background: var(--neon);
+      color: #111112;
+    }
+
+    .empty-msg {
+      color: var(--gray);
+      font-size: 12px;
+      text-align: center;
+      padding: 24px;
+    }
+
+    .searching {
+      color: var(--gray);
+      font-size: 12px;
+      padding: 16px;
+      text-align: center;
+    }
+
+    /* Live support chat items styles */
+    .support-user-item {
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .support-user-item:hover {
+      background: rgba(255, 255, 255, 0.03);
+    }
+    .support-user-item.active {
+      background: rgba(210, 255, 0, 0.08);
+      border-left: 3px solid var(--neon);
+    }
+    .chat-bubble-admin {
+      max-width: 70%;
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+    .chat-bubble-admin.user {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--white);
+      align-self: flex-start;
+      border-bottom-left-radius: 0;
+    }
+    .chat-bubble-admin.admin {
+      background: var(--neon);
+      color: #111112;
+      align-self: flex-end;
+      border-bottom-right-radius: 0;
+    }
+    .chat-bubble-admin.bot {
+      background: rgba(0, 212, 255, 0.1);
+      border: 1px solid rgba(0, 212, 255, 0.2);
+      color: #00D4FF;
+      align-self: flex-start;
+      border-bottom-left-radius: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ADMIN TOAST ALERTS -->
+  <div class="toast-container" id="adminToastContainer"></div>
+
+  <!-- SECURITY LOGINS FOR OVERLAY -->
+  <div id="adminLoginOverlay">
+    <div class="login-card">
+      <h2 style="font-family: var(--font-display); font-size: 28px; font-weight:800; text-transform: uppercase;">PAW<span style="color: var(--neon);">DROP</span></h2>
+      <p style="color: var(--gray); font-size: 13px; margin-top: -12px;">Admin Authentication Portal</p>
+      
+      <form id="adminLoginForm" style="display:flex; flex-direction:column; gap: 16px;">
+        <div style="display:flex; flex-direction:column; gap:6px;">
+          <label style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--gray);">Access Key Password</label>
+          <input type="password" id="adminPasswordInput" class="input-field" placeholder="••••••••" required autofocus />
+        </div>
+        <div id="loginError" style="color: var(--red); font-size: 12px; display: none;"></div>
+        <div style="display: flex; gap: 12px; margin-top: 10px;">
+          <button type="button" class="input-field" id="backToStoreBtn" style="flex:1; cursor:pointer;">← STORE</button>
+          <button type="submit" class="input-field" style="flex:1.5; background-color: var(--neon); color: black; font-weight: 700; border: none; cursor:pointer;">UNLOCK</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- FIXED TOP NAVBAR -->
+  <nav class="top-navbar">
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <button class="menu-toggle" id="menuToggleBtn">☰</button>
+      <a href="/" style="font-family: var(--font-display); font-size: 16px; font-weight: 800; color: var(--white); text-decoration: none; letter-spacing: -0.01em; text-transform: uppercase;">
+        PAW<span style="color: var(--neon);">DROP</span> <span style="font-family: var(--font-body); font-size: 10px; font-weight: 700; background-color: var(--neon); color: black; padding: 2px 6px; border-radius: 2px; margin-left: 6px; vertical-align: middle;">ADMIN</span>
+      </a>
+    </div>
+    
+    <div style="display: flex; align-items: center; gap: 16px;">
+      <!-- Theme Toggle -->
+      <button id="themeToggleBtn" style="border: none; background: transparent; color: var(--white); cursor: pointer; display: flex; align-items: center; justify-content: center; width: 28px; height: 28px;" title="Toggle Theme">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px;">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+      </button>
+      <!-- Bell -->
+      <div style="position: relative; cursor: pointer;">
+        <span style="font-size: 18px;">🔔</span>
+        <span id="notifBadge" style="position: absolute; top: -4px; right: -4px; background-color: var(--neon); color: black; font-size: 9px; font-weight: bold; min-width: 14px; height: 14px; border-radius: 50%; display: flex; align-items: center; justify-content: center; padding: 0 3px;">0</span>
+      </div>
+      <!-- Avatar -->
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="width: 28px; height: 28px; background-color: var(--neon); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; color: black;">AD</span>
+      </div>
+      <!-- Logout -->
+      <button id="adminLogoutBtn" style="border: none; background: transparent; color: var(--red); font-weight: 700; font-size: 12px; cursor: pointer; text-transform: uppercase;">LOGOUT</button>
+    </div>
+  </nav>
+
+  <!-- SIDEBAR NAVIGATION -->
+  <aside class="sidebar" id="sidebar">
+    <nav class="sidebar-menu">
+      <div class="sidebar-item active" data-page="dashboard">📊 Dashboard</div>
+      <div class="sidebar-item" data-page="orders">📦 Orders</div>
+      <div class="sidebar-item" data-page="products">🛍️ Products</div>
+      <div class="sidebar-item" data-page="customers">👥 Customers</div>
+      <div class="sidebar-item" data-page="analytics">📈 Analytics</div>
+      <div class="sidebar-item" data-page="settings">⚙️ Settings</div>
+      <div class="sidebar-item" data-page="cj_importer">🔗 CJ Importer</div>
+      <div class="sidebar-item" data-page="live_chat">💬 Live Chat Support</div>
+      <div class="sidebar-item" data-page="google_chat">🟢 Google Chat Sync</div>
+      <div class="sidebar-item" data-page="diagnostics">🧪 Diagnostics Panel</div>
+    </nav>
+    
+    <!-- Go to store -->
+    <div style="padding: 0 16px;">
+      <a href="/" class="outline-btn" style="display: block; text-align: center; text-decoration: none;">GO TO STORE →</a>
+    </div>
+  </aside>
+
+  <!-- MAIN APP PLATFORM WORKSPACE -->
+  <main class="main-content" id="mainContent">
+
+    <!-- PAGE: DASHBOARD -->
+    <div id="page-dashboard" class="page-view active">
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 28px;">
+        <div>
+          <h1 style="font-family: var(--font-display); font-size: 26px; font-weight: 800; display:flex; align-items:center; gap:8px;">
+            LIVE DASHBOARD <span class="online-indicator"></span>
+          </h1>
+          <p style="color: var(--gray); font-size: 13px;">Real-time metrics</p>
+        </div>
+        <div style="font-family: var(--font-mono); font-size: 12px; color: var(--gray);" id="currentTime">--:--:--</div>
+      </div>
+
+      <!-- Stats Cards -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Orders</div>
+          <div class="stat-value" id="statOrders">0</div>
+          <div class="stat-sub" id="statOrdersSub">+0 today</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Revenue</div>
+          <div class="stat-value neon" id="statRevenue">$0.00</div>
+          <div class="stat-sub">Total</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Today</div>
+          <div class="stat-value" id="statNewOrders">0</div>
+          <div class="stat-sub">New orders</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Visitors</div>
+          <div class="stat-value" id="statVisitors">0</div>
+          <div class="stat-sub">All-time</div>
+        </div>
+      </div>
+
+      <!-- Main Live Grid Split -->
+      <div class="two-col-layout" style="display: grid; grid-template-columns: 6fr 4fr; gap: 24px;">
+        <!-- Left: Orders table -->
+        <div class="table-container">
+          <div class="table-header-panel">
+            <span class="table-title">ALL ORDERS</span>
+            <button id="syncAllBtn" class="outline-btn">⚡ SYNC ALL</button>
+          </div>
+          <div style="overflow-x: auto;">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Customer</th>
+                  <th>Total</th>
+                  <th>Status</th>
+                  <th>Date</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="ordersTableBody">
+                <tr>
+                  <td colspan="6" style="text-align: center; color: var(--gray); padding: 40px 10px;">
+                    Loading order pipeline...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Right: Live Feed notifications -->
+        <div class="live-feed-card">
+          <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 14px;">
+            <span style="font-family: var(--font-display); font-size: 13px; font-weight:800; letter-spacing:0.05em; display:flex; align-items:center; gap:8px;">
+              LIVE FEED <span class="online-indicator"></span>
+            </span>
+          </div>
+          <div class="live-feed-items" id="notifList">
+            <div style="color: var(--gray); font-size: 13px; font-style: italic; text-align: center; padding: 40px 10px;">
+              Waiting for incoming actions...
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- PAGE: ORDERS (FULL ARCHIVES) -->
+    <div id="page-orders" class="page-view">
+      <div style="margin-bottom: 28px;">
+        <h1 style="font-family: var(--font-display); font-size: 26px; font-weight: 800;">ORDERS PIPELINE</h1>
+        <p style="color: var(--gray); font-size: 13px;">Advanced lookup, tracking and catalog export tools</p>
+      </div>
+
+      <!-- Filters Row -->
+      <div style="background-color: var(--black-2); border: 1px solid var(--border); border-radius: 4px; padding: 20px; display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 24px; justify-content: space-between; align-items: center;">
+        <div style="display: flex; flex-wrap: wrap; gap: 12px; flex: 1;">
+          <input type="text" id="orderSearchQuery" class="input-field" placeholder="Search ID or Customer..." style="min-width: 200px;" />
+          
+          <select id="orderStatusSelector" class="input-field" style="background-color: var(--black-3);">
+            <option value="all">All Statuses</option>
+            <option value="pending">Pending</option>
+            <option value="processing">Processing</option>
+            <option value="shipped">Shipped</option>
+            <option value="delivered">Delivered</option>
+            <option value="canceled">Canceled</option>
+            <option value="manual_review">Manual Review</option>
+          </select>
+
+          <!-- Date fields -->
+          <div style="display:flex; align-items:center; gap:6px;">
+            <input type="date" id="orderStartDate" class="input-field" style="background-color: var(--black-3); padding-top: 8px; padding-bottom: 8px;" />
+            <span style="color: var(--gray); font-size: 12px;">to</span>
+            <input type="date" id="orderEndDate" class="input-field" style="background-color: var(--black-3); padding-top: 8px; padding-bottom: 8px;" />
+          </div>
+        </div>
+
+        <button id="exportCsvBtn" class="outline-btn" style="height: 38px; align-self: flex-end;">📑 EXPORT CSV</button>
+      </div>
+
+      <!-- Orders table with filters applied -->
+      <div class="table-container">
+        <div style="overflow-x: auto;">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="filteredOrdersBody">
+              <!-- Rendered via loop -->
+            </tbody>
+          </table>
+        </div>
+        
+        <!-- Pagination controls -->
+        <div style="display:flex; justify-content:space-between; align-items:center; padding: 14px 24px; border-top: 1px solid var(--border); font-size: 13px; color: var(--gray);">
+          <div id="paginationInfo">Showing 0 of 0 entries</div>
+          <div style="display:flex; gap:8px;" id="paginationControls">
+            <!-- Rendered buttons -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- PAGE: PRODUCTS -->
+    <div id="page-products" class="page-view">
+      <div style="margin-bottom: 28px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;">
+        <div>
+          <h1 style="font-family: var(--font-display); font-size: 26px; font-weight: 800;">STORE CATALOG</h1>
+          <p style="color: var(--gray); font-size: 13px;">Browse current catalog listings, stock and ratings</p>
+        </div>
+      </div>
+
+      <!-- Manual Product Upload Form -->
+      <div class="table-container" style="padding: 24px; margin-bottom: 32px; border: 1px solid var(--border); border-radius: 8px; background: var(--black-2);">
+        <h3 style="font-family: var(--font-display); font-size: 18px; font-weight: 700; color: var(--white); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+          <span>🛍️</span> Upload Product Manually (Firestore Sync)
+        </h3>
+        <form id="manualProductForm" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div style="grid-column: span 2;">
+            <label style="display: block; font-size: 11px; text-transform: uppercase; color: var(--gray); font-weight: 700; margin-bottom: 6px;">Product Title *</label>
+            <input type="text" id="manualProdTitle" required placeholder="e.g. Premium Orthopedic Dog Bed" style="width: 100%; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 4px; padding: 10px; color: var(--white); font-size: 13px;" />
+          </div>
+          <div style="grid-column: span 2;">
+            <label style="display: block; font-size: 11px; text-transform: uppercase; color: var(--gray); font-weight: 700; margin-bottom: 6px;">Description *</label>
+            <textarea id="manualProdDesc" required placeholder="Write product description..." rows="3" style="width: 100%; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 4px; padding: 10px; color: var(--white); font-size: 13px; resize: vertical;"></textarea>
+          </div>
+          <div>
+            <label style="display: block; font-size: 11px; text-transform: uppercase; color: var(--gray); font-weight: 700; margin-bottom: 6px;">Price ($) *</label>
+            <input type="number" id="manualProdPrice" step="0.01" min="0" required placeholder="29.99" style="width: 100%; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 4px; padding: 10px; color: var(--white); font-size: 13px;" />
+          </div>
+          <div>
+            <label style="display: block; font-size: 11px; text-transform: uppercase; color: var(--gray); font-weight: 700; margin-bottom: 6px;">Stock Quantity *</label>
+            <input type="number" id="manualProdStock" min="0" required placeholder="50" style="width: 100%; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 4px; padding: 10px; color: var(--white); font-size: 13px;" />
+          </div>
+          <div>
+            <label style="display: block; font-size: 11px; text-transform: uppercase; color: var(--gray); font-weight: 700; margin-bottom: 6px;">Category *</label>
+            <select id="manualProdCategory" style="width: 100%; background: rgba(0,0,0,0.5); border: 1px solid var(--border); border-radius: 4px; padding: 10px; color: var(--white); font-size: 13px;">
+              <option value="COMFORT">COMFORT</option>
+              <option value="HYDRATION">HYDRATION</option>
+              <option value="FEEDING">FEEDING</option>
+              <option value="SAFETY">SAFETY</option>
+              <option value="GROOMING">GROOMING</option>
+              <option value="PLAY">PLAY</option>
+              <option value="GENERAL">GENERAL</option>
+            </select>
+          </div>
+          <div>
+            <label style="display: block; font-size: 11px; text-transform: uppercase; color: var(--gray); font-weight: 700; margin-bottom: 6px;">Product Image *</label>
+            <div style="display: flex; gap: 8px;">
+              <input type="file" id="manualProdImageFile" accept="image/*" style="display: none;" />
+              <button type="button" onclick="document.getElementById('manualProdImageFile').click()" class="outline-btn" style="flex: 1; padding: 10px; font-size: 12px; font-weight: 600; text-align: center;">📷 Upload Local Image</button>
+              <input type="text" id="manualProdImageUrl" placeholder="Or paste image URL" style="flex: 1.5; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 4px; padding: 10px; color: var(--white); font-size: 13px;" />
+            </div>
+            <div id="imageUploadStatus" style="font-size: 11px; color: var(--gray); margin-top: 6px;">No file selected</div>
+          </div>
+          <div style="grid-column: span 2; display: flex; justify-content: flex-end; margin-top: 8px;">
+            <button type="submit" class="btn btn--fill" id="btnSubmitManualProd" style="padding: 12px 24px; font-size: 13px; font-weight: 700;">➕ SUBMIT PRODUCT TO FIRESTORE</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Cloud SQL Connection Diagnostic Panel -->
+      <div id="cloudsql-status-indicator" style="background: var(--black-2); border: 1px solid var(--border); border-radius: 8px; padding: 18px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <span id="cloudsql-status-badge" style="display:inline-block; font-size:11px; padding:4px 10px; border-radius:4px; font-weight:bold; font-family:var(--font-mono); background:#333; color:#aaa; border: 1px solid #444;">CONNECTING...</span>
+          <div>
+            <div id="cloudsql-status-title" style="font-size: 14px; font-weight: bold; color: var(--white);">Verifying Cloud SQL us-west1 Core Integration...</div>
+            <div id="cloudsql-status-subtitle" style="font-size: 11px; color: var(--gray); margin-top: 2px;">Drizzle ORM Engine & Node Postgres client link diag...</div>
+          </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 20px;">
+          <div style="text-align: right;">
+            <span style="font-size: 10px; font-family: var(--font-mono); color: var(--gray); text-transform: uppercase;">Relational Catalog Count</span>
+            <div id="cloudsql-status-count" style="font-size: 18px; font-weight: 800; color: var(--neon); font-family: var(--font-mono);">-</div>
+          </div>
+          <button onclick="refreshCloudSqlStatus()" class="outline-btn" style="padding: 6px 12px; font-size:11px; height: inherit; cursor: pointer; color: #fff; border-color: var(--border);">🧪 Diag Ping</button>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px;" id="productsListGrid">
+        <!-- Products cards rendered in JS -->
+      </div>
+    </div>
+
+
+    <!-- PAGE: CUSTOMERS -->
+    <div id="page-customers" class="page-view">
+      <div style="margin-bottom: 28px;">
+        <h1 style="font-family: var(--font-display); font-size: 26px; font-weight: 800;">CRM DIRECTORY</h1>
+        <p style="color: var(--gray); font-size: 13px;">Directory of active buyers aggregated from checkout orders</p>
+      </div>
+
+      <div class="table-container">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th style="text-align: right;">Total Orders</th>
+              <th style="text-align: right;">Total Spent</th>
+            </tr>
+          </thead>
+          <tbody id="crmTableBody">
+            <!-- Populated via Javascript -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+
+    <!-- PAGE: ANALYTICS -->
+    <div id="page-analytics" class="page-view">
+      <div style="margin-bottom: 28px;">
+        <h1 style="font-family: var(--font-display); font-size: 26px; font-weight: 800;">STORE ANALYTICS</h1>
+        <p style="color: var(--gray); font-size: 13px;">Dynamic sales trends and category performance breakdown</p>
+      </div>
+
+      <div style="display:grid; grid-template-columns: 3fr 2fr; gap: 24px; margin-bottom: 28px;" class="two-col-layout">
+        <!-- Sales chart card -->
+        <div class="table-container" style="padding: 24px; display:flex; flex-direction:column; gap:20px;">
+          <h3 style="font-family: var(--font-display); font-size:14px; font-weight:800; letter-spacing:0.05em;">WEEKLY SALES TREND</h3>
+          <!-- Static SVG based beautiful responsive graph -->
+          <svg viewBox="0 0 500 200" style="width:100%; height: auto; background-color: #121213; border-radius:4px; padding:10px;">
+            <!-- Grid lines -->
+            <line x1="40" y1="20" x2="480" y2="20" stroke="rgba(255,255,255,0.03)" />
+            <line x1="40" y1="60" x2="480" y2="60" stroke="rgba(255,255,255,0.03)" />
+            <line x1="40" y1="100" x2="480" y2="100" stroke="rgba(255,255,255,0.03)" />
+            <line x1="40" y1="140" x2="480" y2="140" stroke="rgba(255,255,255,0.03)" />
+            <line x1="40" y1="170" x2="480" y2="170" stroke="rgba(255,255,255,0.08)" />
+            
+            <!-- Spline Path -->
+            <path d="M 40,170 Q 110,130 180,110 T 320,60 T 480,30" fill="none" stroke="var(--neon)" stroke-width="2" />
+            <path d="M 40,170 Q 110,130 180,110 T 320,60 T 480,30 L 480,170 L 40,170 Z" fill="url(#neonGradient)" opacity="0.08" />
+            
+            <!-- Nodes -->
+            <circle cx="180" cy="110" r="4" fill="var(--neon)" />
+            <circle cx="320" cy="60" r="4" fill="var(--neon)" />
+            <circle cx="480" cy="30" r="4" fill="var(--neon)" />
+            
+            <!-- Labels -->
+            <text x="40" y="185" fill="var(--gray)" font-size="9" font-family="monospace">Mon</text>
+            <text x="155" y="185" fill="var(--gray)" font-size="9" font-family="monospace">Wed</text>
+            <text x="295" y="185" fill="var(--gray)" font-size="9" font-family="monospace">Fri</text>
+            <text x="445" y="185" fill="var(--gray)" font-size="9" font-family="monospace">Sun</text>
+            
+            <defs>
+              <linearGradient id="neonGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="var(--neon)" />
+                <stop offset="100%" stop-color="transparent" />
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+
+        <!-- Orders Breakdown card -->
+        <div class="table-container" style="padding: 24px; display:flex; flex-direction:column; gap:20px;">
+          <h3 style="font-family: var(--font-display); font-size:14px; font-weight:800; letter-spacing:0.05em;">CATEGORY PREFERENCE</h3>
+          <div style="display:flex; flex-direction:column; gap:16px; margin-top:8px;">
+            <div>
+              <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;">
+                <span>Comfort & Bedding</span>
+                <span style="font-family: var(--font-mono); font-weight:bold;">48%</span>
+              </div>
+              <div style="height:6px; background-color: var(--black-3); border-radius: 3px; overflow:hidden;">
+                <div style="height:100%; width: 48%; background-color: var(--neon); border-radius: 3px;"></div>
+              </div>
+            </div>
+            <div>
+              <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;">
+                <span>Active & Outdoor Wear</span>
+                <span style="font-family: var(--font-mono); font-weight:bold;">25%</span>
+              </div>
+              <div style="height:6px; background-color: var(--black-3); border-radius: 3px; overflow:hidden;">
+                <div style="height:100%; width: 25%; background-color: var(--blue); border-radius: 3px;"></div>
+              </div>
+            </div>
+            <div>
+              <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;">
+                <span>Feeding & Organic Bowls</span>
+                <span style="font-family: var(--font-mono); font-weight:bold;">15%</span>
+              </div>
+              <div style="height:6px; background-color: var(--black-3); border-radius: 3px; overflow:hidden;">
+                <div style="height:100%; width: 15%; background-color: var(--green); border-radius: 3px;"></div>
+              </div>
+            </div>
+            <div>
+              <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;">
+                <span>Toys & Lasers</span>
+                <span style="font-family: var(--font-mono); font-weight:bold;">12%</span>
+              </div>
+              <div style="height:6px; background-color: var(--black-3); border-radius: 3px; overflow:hidden;">
+                <div style="height:100%; width: 12%; background-color: var(--orange); border-radius: 3px;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- PAGE: SETTINGS -->
+    <div id="page-settings" class="page-view">
+      <div style="margin-bottom: 28px;">
+        <h1 style="font-family: var(--font-display); font-size: 26px; font-weight: 800;">ADMINISTRATIVE SETTINGS</h1>
+        <p style="color: var(--gray); font-size: 13px;">Operational configurations, triggers and credentials</p>
+      </div>
+
+      <div style="max-width:600px; background-color: var(--black-2); border: 1px solid var(--border); border-radius:4px; padding: 32px; display:flex; flex-direction:column; gap:24px;">
+        <div>
+          <h3 style="font-size:16px; font-weight:700; margin-bottom: 6px;">CJ API Connection Profile</h3>
+          <p style="color: var(--gray); font-size:13px; margin-bottom:14px;">Define dropship API authentication limits</p>
+          <div style="display:flex; flex-direction:column; gap:12px;">
+            <input type="text" class="input-field" value="https://developers.cjdropshipping.com/api2.0/v1" readonly />
+            <input type="email" class="input-field" value="hafsakhatun1990hk@gmail.com" readonly />
+          </div>
+        </div>
+
+        <hr style="border:none; border-top:1px solid var(--border);" />
+
+        <div>
+          <h3 style="font-size:16px; font-weight:700; margin-bottom: 6px;">EmailJS Event Sync</h3>
+          <p style="color: var(--gray); font-size:13px; margin-bottom:14px;">Trigger templates on status updates</p>
+          <div style="display:flex; flex-direction:column; gap:12px;">
+            <div style="display:flex; justify-content:space-between; font-size:13px; padding: 6px 0;">
+              <span>Automate Shipment Confirmations</span>
+              <input type="checkbox" checked style="accent-color: var(--neon);" />
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:13px; padding: 6px 0;">
+              <span>Automate Back-Order alerts</span>
+              <input type="checkbox" checked style="accent-color: var(--neon);" />
+            </div>
+          </div>
+        </div>
+
+        <button class="outline-btn" style="padding: 12px; border-radius:4px; font-size:11px;" onclick="showAdminToast('Settings updated locally!', 'success')">Save Settings Profiles</button>
+      </div>
+    </div>
+
+
+    <!-- PAGE: CJ IMPORTER -->
+    <div id="page-cj_importer" class="page-view">
+      <div style="margin-bottom: 28px;">
+        <h1 style="font-family: var(--font-display); font-size: 26px; font-weight: 800; text-transform: uppercase; margin-bottom: 4px;">CJ DROPSHIPS PRODUCTS IMPORTER</h1>
+        <p style="color: var(--gray); font-size: 13px;">Instant dropshipping sync: query items directly, set custom profit margins, and syndicate products instantly to your retail database.</p>
+      </div>
+
+      <!-- Mode Selector Tabs -->
+      <div class="importer-tabs">
+        <button class="imp-tab active" id="tab-fetch" onclick="switchImporterTab('fetch')">Fetch by PID</button>
+        <button class="imp-tab" id="tab-search" onclick="switchImporterTab('search')">Catalog Search</button>
+      </div>
+
+      <!-- VIEW 1: FETCH BY PID -->
+      <div id="imp-view-fetch" class="importer-subview">
+        <div class="pid-input-row">
+          <input type="text" id="impPidInput" class="imp-input" placeholder="Enter CJ Product ID (e.g., 123, 456, 789)..." />
+          <button class="btn-fetch" onclick="fetchCJProductById()">Fetch Specs</button>
+        </div>
+        <p class="imp-hint">Enter any valid PID or use demo IDs (<b>123</b>: Bed, <b>456</b>: Lasers, <b>789</b>: Safety Bowl, <b>201</b>: Secure Collar) for seamless simulation.</p>
+      </div>
+
+      <!-- VIEW 2: SEARCH CATALOG -->
+      <div id="imp-view-search" class="importer-subview" style="display: none;">
+        <div class="search-row">
+          <input type="text" id="impSearchInput" class="imp-input" placeholder="Search products in English (e.g., cat, dog, bowl)..." onkeydown="if(event.key==='Enter') executeCatalogSearch()" />
+          <button class="btn-fetch" onclick="executeCatalogSearch()">Search Inventory</button>
+        </div>
+        
+        <!-- Search Results list container -->
+        <div id="searchResultsContainer" style="margin-top: 16px; max-height: 400px; overflow-y: auto; display: none;">
+          <!-- Results populated dyn. -->
+        </div>
+      </div>
+
+      <!-- Load state indicators -->
+      <div id="cjFetchLoader" style="display: none;">
+        <div class="fetch-loading">
+          <div class="fetch-spinner"></div>
+          <span>Connecting to CJ Dropshipping servers... Parsing catalog items</span>
+        </div>
+      </div>
+
+      <div id="cjFetchError" style="display: none;">
+        <div class="fetch-error">
+          <span id="cjFetchErrorText">Failed calling CJ API. Standard failover simulated</span>
+        </div>
+      </div>
+
+      <!-- Dynamic Interactive Product Preview Panel -->
+      <div id="cjProductPreview" class="preview-grid" style="display: none;">
+        <!-- Left: Image Gallery & Carousel -->
+        <div class="preview-gallery">
+          <div class="preview-main-img">
+            <img id="mainPreviewImg" src="" alt="Main product" referrerPolicy="no-referrer" />
+          </div>
+          <div class="preview-thumbnails" id="previewThumbnails">
+            <!-- Mini thumbs populated dyn. -->
+          </div>
+        </div>
+
+        <!-- Right: Real-time Editing, Price Optimizer & Synergies -->
+        <div class="preview-form">
+          <div class="form-group">
+            <label>Product ID <span class="locked-badge">Locked</span></label>
+            <input type="text" id="prodPid" class="imp-field locked" readonly />
+          </div>
+
+          <div class="form-group">
+            <label>Title Name <span class="edit-badge">Editable</span></label>
+            <input type="text" id="prodName" class="imp-field editable" style="font-size: 15px; font-weight: 600;" placeholder="Custom Retail Title" />
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label>Cost Price (CJ)</label>
+              <input type="text" id="prodCjPrice" class="imp-field locked" readonly />
+            </div>
+            <div class="form-group">
+              <label>Shipping Method</label>
+              <input type="text" id="prodShipping" class="imp-field locked" readonly value="CJ Packet Elegant" />
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label>Category Group</label>
+              <select id="prodCategory" class="imp-field imp-select">
+                <option value="COMFORT">Comfort & Beds</option>
+                <option value="PLAY">Interactive Toys</option>
+                <option value="FEEDING">Slow Feeding</option>
+                <option value="SAFETY">Safety Collars</option>
+                <option value="APPAREL">Apparel & Gear</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Retail Markup (%)</label>
+              <input type="number" id="prodMarkup" class="imp-field" value="50" min="0" max="500" oninput="calculateRealtimeProfit()" />
+            </div>
+          </div>
+
+          <!-- Price Optimizer & Profit Calculator -->
+          <div class="profit-calc">
+            <div class="profit-row">
+              <span>Dropship Wholesale Cost:</span>
+              <span id="calcCjPrice">$0.00</span>
+            </div>
+            <div class="profit-row">
+              <span>Estimated Shipping:</span>
+              <span id="calcShippingPrice">$4.50</span>
+            </div>
+            <div class="profit-row">
+              <span>Target Selling Price:</span>
+              <span><input type="number" step="0.01" id="prodRetailPrice" class="imp-field" style="width: 100px; padding: 4px 8px; display: inline-block; font-weight: 700; border-color: var(--neon);" oninput="calculateRealtimeProfit(true)" /></span>
+            </div>
+            <div class="profit-row profit-total">
+              <span>Net Profit per Sale:</span>
+              <span id="calcProfitText" style="color: var(--green); font-size: 15px;">+$0.00</span>
+            </div>
+            <div class="profit-margin" id="calcMarginText">ROI: 0%</div>
+          </div>
+
+          <!-- Syndicate action -->
+          <button class="btn-save" onclick="syndicateProduct()">Syndicate & Sync to PAWDROP DB</button>
+          
+          <div id="saveStatus" class="save-status"></div>
+        </div>
+      </div>
+
+      <!-- Live Imported Inventory Feed -->
+      <div class="imported-section">
+        <h3>Synced Dropshipping Products</h3>
+        <div class="imported-grid" id="importedGrid">
+          <div class="empty-msg">No dropshipped products synced yet. Put in a PID or search above to get started!</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE: LIVE SUPPORT CHAT -->
+    <div id="page-live_chat" class="page-view">
+      <div style="margin-bottom: 28px;">
+        <h1 style="font-family: var(--font-display); font-size: 26px; font-weight: 800; text-transform: uppercase; margin-bottom: 4px;">💬 REAL-TIME SUPPORT INBOX</h1>
+        <p style="color: var(--gray); font-size: 13px;">Instant real-time support chat. Chat with customers, answer inquiries, and resolve tickets instantly.</p>
+      </div>
+
+      <div class="chat-dashboard-layout" style="display: grid; grid-template-columns: 320px 1fr; gap: 24px; min-height: 550px; background: var(--black-2); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-top: 10px;">
+        
+        <!-- Left: Customer List -->
+        <div class="chat-users-sidebar" style="border-right: 1px solid var(--border); display: flex; flex-direction: column; max-height: 550px; overflow-y: auto; background: rgba(0,0,0,0.15);">
+          <div style="padding: 16px; border-bottom: 1px solid var(--border); font-size: 12px; font-weight: bold; text-transform: uppercase; color: var(--gray); letter-spacing: 0.05em;">
+            Active Conversations
+          </div>
+          <div id="chatUsersList" style="display: flex; flex-direction: column; flex: 1; overflow-y: auto;">
+            <!-- Rendered in real-time -->
+            <div class="empty-msg" style="padding: 30px; text-align: center; color: var(--gray); font-size: 13px;">No active support tickets.</div>
+          </div>
+        </div>
+
+        <!-- Right: Chat Window / Workspace -->
+        <div class="chat-workspace-pane" style="display: flex; flex-direction: column; background: rgba(0,0,0,0.05); max-height: 550px; position: relative;">
+          
+          <!-- State 1: Empty state -->
+          <div id="chatWorkspaceEmpty" style="display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; min-height: 400px; padding: 40px; text-align: center; color: var(--gray);">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 16px; opacity: 0.7;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <h3 style="color: var(--white); font-size: 16px; font-weight: bold; margin-bottom: 6px;">Support Workspace Idle</h3>
+            <p style="font-size: 13px; max-width: 320px; line-height: 1.4; color: var(--gray);">Select an active customer conversation history on the left side to enter direct real-time agent console.</p>
+          </div>
+
+          <!-- State 2: Active chat console -->
+          <div id="chatConsoleWidget" style="display: none; flex-direction: column; flex: 1; min-height: 400px; height: 100%;">
+            <!-- Header -->
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; border-bottom: 1px solid var(--border); background: rgba(0,0,0,0.15);">
+              <div>
+                <h4 style="font-size: 14px; font-weight: bold; color: var(--white); margin: 0;" id="chatActiveUserName">Customer Support Ticket</h4>
+                <div style="font-size: 12px; color: var(--gray);" id="chatActiveUserEmail">-</div>
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--neon); font-family: var(--font-mono); font-weight: bold; text-transform: uppercase;">
+                <span style="display: inline-block; width: 8px; height: 8px; background: var(--neon); border-radius: 50%; box-shadow: 0 0 10px var(--neon);"></span>
+                LIVE CONNECTED
+              </div>
+            </div>
+
+            <!-- Messages Stream -->
+            <div id="chatConsoleMessages" style="flex: 1; padding: 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; min-height: 250px; border-bottom: 1px solid var(--border);">
+              <!-- Bubble notes -->
+            </div>
+
+            <!-- Action footer input -->
+            <form id="chatConsoleForm" style="display: flex; gap: 12px; padding: 16px 24px; background: rgba(0,0,0,0.15);" onsubmit="sendAdminSupportReply(event)">
+              <input type="text" id="chatConsoleInput" style="flex: 1; background: var(--black); border: 1px solid var(--border); color: var(--white); font-size: 13px; padding: 10px 16px; border-radius: 4px; outline: none;" placeholder="Type your formal customer reply..." autocomplete="off">
+              <button class="outline-btn" type="submit" style="white-space: nowrap; padding: 10px 20px; font-size: 12px; cursor: pointer; background: var(--neon) !important; color: #111112 !important; border: none; font-weight: bold;">Send Reply</button>
+            </form>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+    <!-- PAGE: GOOGLE CHAT INTEGRATION -->
+    <div id="page-google_chat" class="page-view">
+      <div style="margin-bottom: 28px;">
+        <h1 style="font-family: var(--font-display); font-size: 26px; font-weight: 800; text-transform: uppercase; margin-bottom: 4px;">🟢 GOOGLE CHAT REALTIME SYNC</h1>
+        <p style="color: var(--gray); font-size: 13px;">Manage Google Chat synchronization. Seamlessly forward customer support conversations and alerts in real-time.</p>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr; gap: 24px; max-width: 800px;">
+        
+        <!-- Connection Config Card -->
+        <div style="background: var(--black-2); border: 1px solid var(--border); border-radius: 8px; padding: 24px; position: relative;">
+          <h3 style="font-size: 16px; font-weight: bold; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+            🔑 Google Workspace Account Connection
+          </h3>
+          
+          <div id="gchat_disconnected_view" style="display: flex; flex-direction: column; gap: 16px; padding: 10px 0;">
+            <p style="font-size: 13px; color: var(--gray); line-height: 1.5; margin: 0;">
+              Connect your Google Workspace Account to configure standard space synchronization. You will be able to stream client support tickets directly to your Google Chat channels.
+            </p>
+            <button id="btn_connect_gchat" onclick="authGoogleChat()" class="outline-btn" style="width: fit-content; background: #fff !important; color: #111 !important; border: none; font-weight: bold; padding: 10px 20px; font-size: 13px; display: flex; align-items: center; gap: 8px; cursor: pointer;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15.545 6.558a9.42 9.42 0 0 1 .139 1.626c0 2.434-.87 4.492-2.384 5.885h-.002C11.978 15.292 10.158 16 8 16A8 8 0 1 1 8 0c2.158 0 3.978.783 5.4 2.062l-2.202 2.22C10.218 3.322 9.243 3 8 3a5 5 0 1 0 0 10c1.373 0 2.52-.907 2.935-2.146H8V8h6.205c.148.742.23 1.536.23 2.164 0 3.82-2.56 6.536-6.435 6.536a8.7 8.7 0 0 1-5.11-1.637" fill="currentColor"/></svg>
+              Sign In with Google
+            </button>
+          </div>
+
+          <div id="gchat_connected_view" style="display: none; flex-direction: column; gap: 20px;">
+            <div style="background: rgba(46, 213, 115, 0.1); border: 1px solid #2ed573; padding: 12px 16px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <div style="font-size: 13px; font-weight: bold; color: #2ed573; display: flex; align-items: center; gap: 6px;">
+                  <span style="display:inline-block; width:6px; height:6px; background:#2ed573; border-radius:50%"></span>
+                  Google Chat API Securely Bound
+                </div>
+                <div id="gchat_user_email" style="font-size: 12px; color: var(--gray); margin-top: 2px;">support@pawdrop.com</div>
+              </div>
+              <button onclick="disconnectGoogleChat()" style="background: transparent; border: 1px solid var(--border); color: var(--red); font-size: 11px; padding: 6px 12px; border-radius: 4px; cursor: pointer;">Disconnect</button>
+            </div>
+
+            <!-- Choose Space Config -->
+            <div>
+              <label style="font-size: 11px; font-family: var(--font-mono); font-weight: bold; text-transform: uppercase; color: var(--gray); display: block; margin-bottom: 8px;">1. Linked Google Chat Space</label>
+              <div style="display: flex; gap: 12px; align-items: center;">
+                <select id="gchat_spaces_dropdown" onchange="saveGoogleChatSyncSettings()" style="flex: 1; background: var(--black); border: 1px solid var(--border); color: #fff; padding: 10px 12px; font-size: 13px; border-radius: 4px; outline: none;">
+                  <option value="">Fetching channels from Google Chat...</option>
+                </select>
+                <button onclick="fetchGoogleChatSpacesList()" class="outline-btn" style="padding: 10px 14px; font-size: 12px; height: 38px; cursor: pointer;">Refresh List</button>
+              </div>
+              <p style="font-size: 11px; color: var(--gray); margin-top: 6px; line-height: 1.4;">
+                Select the specific space where real-time support tickets should stream. Don't see one?
+                <a href="javascript:void(0)" onclick="createDedicatedGoogleChatSpace()" style="color: var(--neon); text-decoration: underline; font-weight: 500;">Click here to automatically create a dedicated PAWDROP Support Space</a>.
+              </p>
+            </div>
+
+            <!-- Toggle Switch & Sync -->
+            <div style="display: flex; align-items: flex-start; gap: 16px; border-top: 1px solid var(--border); padding-top: 16px;">
+              <input type="checkbox" id="gchat_sync_toggle" onchange="saveGoogleChatSyncSettings()" style="width: 18px; height: 18px; margin-top: 2px; cursor: pointer; accent-color: var(--neon);">
+              <div>
+                <label for="gchat_sync_toggle" style="font-size: 13px; font-weight: bold; color: var(--white); cursor: pointer; display: block;">Enable Real-Time Support Forwarding</label>
+                <span style="font-size: 12px; color: var(--gray); display: block; margin-top: 2px;">When active, any new customer support inquiries, AI responses, or admin replies are instantaneously streamed to Google Chat!</span>
+              </div>
+            </div>
+
+            <!-- Alternate Webhook Section (Zero-Expiration Fallback) -->
+            <div style="border-top:1px solid var(--border); padding-top:16px;">
+              <label style="font-size: 11px; font-family: var(--font-mono); font-weight: bold; text-transform: uppercase; color: var(--gray); display: block; margin-bottom: 8px;">🔌 Option B: Google Chat Webhook URL (Zero-Expiration Fallback)</label>
+              <div style="display: flex; gap: 12px; align-items: center;">
+                <input type="text" id="gchat_webhook_url" class="input-field" placeholder="https://chat.googleapis.com/v1/spaces/.../messages?key=...&token=..." style="flex: 1; margin: 0; background-color: var(--black-3); font-size:12px; height: 38px;" />
+                <button onclick="saveGoogleChatWebhook()" class="outline-btn" style="height: 38px; font-size: 12px; font-weight:bold; cursor: pointer; white-space: nowrap;">Save Webhook</button>
+              </div>
+              <p style="font-size: 11px; color: var(--gray); margin-top: 6px; line-height: 1.4;">
+                If your Sign In with Google token expires or you prefer a zero-login integration, create an **Incoming Webhook** in your Google Chat Space and paste its full URL here. Real-time support messages will stream flawlessly index-locked!
+              </p>
+            </div>
+
+            <!-- Send test message -->
+            <div style="border-top: 1px solid var(--border); padding-top: 16px; display: flex; align-items: center; gap: 12px;">
+              <button onclick="sendGoogleChatTestPing()" class="outline-btn" style="background: var(--border); color: #fff; font-size: 12px; padding: 8px 16px; cursor: pointer; font-weight: bold;">🧪 Send Test Message</button>
+              <div id="gchat_test_status" style="font-size: 12px; color: var(--gray);"></div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <div style="background: rgba(210,255,0,0.02); border: 1px dashed var(--border); border-radius: 8px; padding: 20px; font-size: 12px; line-height: 1.5; color: var(--gray);">
+          <strong style="color: var(--white); display: block; margin-bottom: 6px;">💡 Google Chat Integration Notes:</strong>
+          - Make sure Google Chat is enabled for your Workspace domain.<br>
+          - Real-time messages are posted using structured Markdown for superior legibility.<br>
+          - Any team member in your Google Chat support channel can view ongoing inquiries in real time.
+        </div>
+
+      </div>
+    </div>
+
+    <!-- PAGE: DIAGNOSTICS & SYSTEM TESTING -->
+    <div id="page-diagnostics" class="page-view">
+      <div style="margin-bottom: 28px;">
+        <h1 style="font-family: var(--font-display); font-size: 26px; font-weight: 800; text-transform: uppercase; margin-bottom: 4px;">🧪 INTERNAL TESTING & DIAGNOSTICS</h1>
+        <p style="color: var(--gray); font-size: 13px;">Real-time checks for system integrations, database health, ecommerce tracking, and form pipeline connectivity.</p>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+        
+        <!-- Left: System Connections Indicator -->
+        <div style="background: var(--black-2); border: 1px solid var(--border); border-radius: 8px; padding: 24px; display: flex; flex-direction: column; gap: 18px;">
+          <h3 style="font-size: 16px; font-weight: bold; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin: 0; display: flex; align-items: center; gap: 8px; color: var(--white);">
+            🔗 Connector Health Checks
+          </h3>
+          
+          <!-- Firebase Connection -->
+          <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.01); border: 1px solid var(--border); padding: 12px 16px; border-radius: 6px;">
+            <div>
+              <div style="font-weight: bold; font-size: 13px; color: var(--white);">Firebase Database Listener</div>
+              <div style="font-size: 11px; color: var(--gray); margin-top: 2px;">Real-time sync connection status</div>
+            </div>
+            <span id="diag-firebase-status" class="status-badge pending" style="text-transform: uppercase;">Connecting...</span>
+          </div>
+
+          <!-- Firebase Authentication Status -->
+          <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.01); border: 1px solid var(--border); padding: 12px 16px; border-radius: 6px;">
+            <div>
+              <div style="font-weight: bold; font-size: 13px; color: var(--white);">Firebase Auth Service</div>
+              <div style="font-size: 11px; color: var(--gray); margin-top: 2px;">User session security state</div>
+            </div>
+            <span id="diag-auth-status" class="status-badge pending" style="text-transform: uppercase;">Checking...</span>
+          </div>
+
+          <!-- Products Loading Verification -->
+          <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.01); border: 1px solid var(--border); padding: 12px 16px; border-radius: 6px;">
+            <div>
+              <div style="font-weight: bold; font-size: 13px; color: var(--white);">Catalog Database Load</div>
+              <div style="font-size: 11px; color: var(--gray); margin-top: 2px;">Product synchronization validator</div>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
+              <span id="diag-products-status" class="status-badge pending" style="text-transform: uppercase;">Querying...</span>
+              <span id="diag-products-count" style="font-size: 10px; font-family: var(--font-mono); color: var(--gray);">0 items loaded</span>
+            </div>
+          </div>
+
+          <!-- Checkout Pipeline Connection -->
+          <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.01); border: 1px solid var(--border); padding: 12px 16px; border-radius: 6px;">
+            <div>
+              <div style="font-weight: bold; font-size: 13px; color: var(--white);">Checkout API Connectivity</div>
+              <div style="font-size: 11px; color: var(--gray); margin-top: 2px;">Checks direct database order placing</div>
+            </div>
+            <span id="diag-checkout-status" class="status-badge pending" style="text-transform: uppercase;">Checking...</span>
+          </div>
+
+          <!-- Run Pings Button -->
+          <button onclick="runDiagnosticPipeline()" class="btn btn--outline" style="width: 100%; height: 42px; text-transform: uppercase; font-weight: bold; cursor: pointer; border: 1px solid var(--neon); color: var(--neon); background: transparent;">⚡ Run Connection Diagnostics</button>
+        </div>
+
+        <!-- Right: Active Simulator Controls -->
+        <div style="background: var(--black-2); border: 1px solid var(--border); border-radius: 8px; padding: 24px; display: flex; flex-direction: column; gap: 18px;">
+          <h3 style="font-size: 16px; font-weight: bold; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin: 0; display: flex; align-items: center; gap: 8px; color: var(--white);">
+            🧪 Diagnostics & Simulation
+          </h3>
+          <p style="font-size: 13px; color: var(--gray); line-height: 1.5; margin: 0;">
+            Trigger mock checkout pipelines and track telemetry directly inside the diagnostics logs. This helps check end-to-end functionality safely.
+          </p>
+
+          <div style="display: flex; flex-direction: column; gap: 12px; background: rgba(255,255,255,0.01); border: 1px dashed var(--border); padding: 18px; border-radius: 6px;">
+            <div style="font-weight: bold; font-size: 12px; text-transform: uppercase; letter-spacing:0.05em; color: var(--neon);">Dummy Checkout Simulator</div>
+            <div style="font-size: 11px; color: var(--gray); line-height: 1.4; margin-bottom: 8px;">
+              Forces a safe programmatic checkout using a dummy customer "Sarah Jenkins (Diagnostic Test)". Validates write operations and events.
+            </div>
+            <button onclick="simulateDummyCheckout()" id="btnSimulateCheckout" class="btn btn--white" style="height: 38px; border: none; color: var(--black); background: var(--white); font-weight: bold; cursor: pointer;">Simulate Demo Checkout</button>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 12px; background: rgba(255,255,255,0.01); border: 1px dashed var(--border); padding: 18px; border-radius: 6px;">
+            <div style="font-weight: bold; font-size: 12px; text-transform: uppercase; letter-spacing:0.05em; color: var(--blue);">Network Status Diagnostics</div>
+            <div style="font-size: 11px; color: var(--gray); line-height: 1.4; margin-bottom: 8px;">
+              Check the client application's response to internet offline/online state changes. Under strict testing guidelines, the system logs network status transitions.
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; font-family: var(--font-mono); font-size: 11px; padding: 4px 0;">
+              <span style="color: var(--gray);">Browser Connection:</span>
+              <span id="diagnostic-network-indicator" style="font-weight: bold; color: var(--neon);">ONLINE</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Bottom Layout Section: GA4/GTM E-commerce DataLayer Event Stream -->
+      <div style="background: var(--black-2); border: 1px solid var(--border); border-radius: 8px; padding: 24px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 14px; margin-bottom: 16px;">
+          <div>
+            <span style="font-family: var(--font-display); font-size: 14px; font-weight:800; letter-spacing:0.05em; display:flex; align-items:center; gap:8px; color: var(--white);">
+              📊 REAL-TIME E-COMMERCE DATA LAYER EVENT STREAM
+            </span>
+            <p style="color: var(--gray); font-size: 12px; margin: 4px 0 0 0;">Capturing GTM dataLayer pushes and event telemetry live from user session</p>
+          </div>
+          <button onclick="clearDiagnosticEventLogs()" class="btn btn--outline" style="border: 1px solid var(--border); color: var(--white); background: transparent; padding: 6px 14px; height: auto; font-size: 11px; font-weight: bold; cursor: pointer;">Clear Stream</button>
+        </div>
+
+        <div style="background: var(--black-3); border-radius: 6px; padding: 16px; border: 1px solid var(--border); max-height: 360px; overflow-y: auto; font-family: var(--font-mono); font-size: 12px;" id="diagnostic-events-log-container">
+          <div style="color: var(--gray); text-align: center; padding: 40px 0; font-style: italic;">
+            Waiting for E-Commerce Actions (view_item, add_to_cart, begin_checkout, purchase)...
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- SEAMLESS CLIENT ORDER DETAILS DRAWER -->
+  <div class="drawer-overlay" id="detailDrawerOverlay" onclick="closeOrderDrawer()"></div>
+  <div class="drawer" id="detailDrawer">
+    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding-bottom:14px;">
+      <h3 style="font-family: var(--font-display); font-size:16px; font-weight:800;">ORDER DETAILS <span id="drawerOrderId" style="color:var(--neon);">#PAWDROP-0</span></h3>
+      <button onclick="closeOrderDrawer()" style="background:none; border:none; color:var(--white); font-size:16px; cursor:pointer;">✕</button>
+    </div>
+
+    <!-- Info fields inside Drawer -->
+    <div style="display:flex; flex-direction:column; gap:16px;">
+      <div>
+        <label style="font-size:10px; text-transform:uppercase; color:var(--gray); letter-spacing:0.05em; display:block; margin-bottom:4px;">Date Placed</label>
+        <span id="drawerOrderDate" style="font-size:13px; font-family: var(--font-mono);">-</span>
+      </div>
+      <div>
+        <label style="font-size:10px; text-transform:uppercase; color:var(--gray); letter-spacing:0.05em; display:block; margin-bottom:4px;">Fulfillment Status</label>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <span id="drawerOrderStatusBadge" class="status-badge" style="margin-top:2px;">-</span>
+          <select id="drawerOrderStatusUpdate" class="input-field" style="background-color: var(--black-3); padding: 4px 8px; font-size:11px; height:28px; width:auto; margin:0;" onchange="updateDrawerOrderFulfillmentStatus()">
+            <option value="pending">Pending</option>
+            <option value="processing">Processing</option>
+            <option value="shipped">Shipped</option>
+            <option value="delivered">Delivered</option>
+            <option value="canceled">Canceled</option>
+            <option value="manual_review">Manual Review</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label style="font-size:10px; text-transform:uppercase; color:var(--gray); letter-spacing:0.05em; display:block; margin-bottom:4px;">Shipped Via CJ</label>
+        <span id="drawerOrderCJId" style="font-size:13px; font-weight:bold; color:var(--blue);">-</span>
+      </div>
+      <!-- Manual Tracking Form Section Inside Drawer -->
+      <div id="drawerTrackingSection" style="display:none; flex-direction:column; gap:8px; border: 1px dashed var(--border); padding: 12px; border-radius: 4px; background: rgba(255,255,255,0.01); margin-top: 8px;">
+        <label style="font-size:10px; text-transform:uppercase; color:var(--gray); letter-spacing:0.05em; display:block;">MANUAL SHIPMENT TRACKING</label>
+        <div style="display:flex; gap:6px;">
+          <input type="text" id="drawerTrackingNum" placeholder="Tracking Number" class="input-field" style="flex:1; padding:4px 8px; font-size:12px; height:28px; margin:0; background-color: var(--black-3);" />
+          <input type="text" id="drawerTrackingCarrier" placeholder="Carrier" class="input-field" style="width:100px; padding:4px 8px; font-size:12px; height:28px; margin:0; background-color: var(--black-3);" />
+        </div>
+        <button onclick="saveDrawerTracking()" class="outline-btn" style="height:28px; font-size:10px; padding:0 12px; width:100%; text-transform:uppercase; font-weight:bold; cursor:pointer;">Update Tracking</button>
+      </div>
+    </div>
+
+    <hr style="border:none; border-top:1px solid var(--border);" />
+
+    <!-- Customer -->
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <h4 style="font-size:12px; text-transform:uppercase; letter-spacing:0.05em; color:var(--gray);">Customer Profile</h4>
+      <div style="font-size:13px; display:flex; flex-direction:column; gap:4px;">
+        <div>Name: <strong id="drawerCustomerName">-</strong></div>
+        <div>Email: <span id="drawerCustomerEmail">-</span></div>
+        <div>Phone: <span id="drawerCustomerPhone">-</span></div>
+        <div style="color:var(--gray); margin-top:4px;">Shipping: <span id="drawerCustomerAddress" style="line-height:1.4;">-</span></div>
+      </div>
+    </div>
+
+    <hr style="border:none; border-top:1px solid var(--border);" />
+
+    <!-- Purchased List -->
+    <div>
+      <h4 style="font-size:12px; text-transform:uppercase; letter-spacing:0.05em; color:var(--gray); margin-bottom:12px;">Cart Contents</h4>
+      <div id="drawerItemList" style="display:flex; flex-direction:column; gap:12px; max-height:220px; overflow-y:auto;">
+        <!-- Embedded list items -->
+      </div>
+    </div>
+
+    <hr style="border:none; border-top:1px solid var(--border); margin-top:auto;" />
+
+    <div style="display:flex; justify-content:space-between; font-weight:700; font-size:15px; font-family:var(--font-mono);">
+      <span>TOTAL VALUE</span>
+      <span id="drawerTotal" style="color:var(--neon);">$0.00</span>
+    </div>
+
+    <div id="drawerDeleteContainer" style="margin-top: 16px; display: none;">
+      <button onclick="deleteCurrentOrderFromDrawer()" class="outline-btn" style="width: 100%; border-color: #ef4444; color: #ef4444; padding: 10px 14px; font-weight: bold;">DELETE ORDER</button>
+    </div>
+  </div>
+
+  <!-- Core Firebase compat scripts -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+  <!-- Admin logic connection modules -->
+  <script type="module" src="/src/js/admin.js"></script>
+
+  <!-- Complete Redesign SPA Coordinator module -->
+  <script type="module">
+    import { realtime } from '/src/js/realtime.js';
+    import { orderManager } from '/src/js/orderManager.js';
+    import { db } from '/src/js/firebase-config.js';
+    import { addProductToFirestore, uploadProductImage } from '/src/js/firebase.js';
+    import { initDiagnosticsView, runDiagnosticPipeline, simulateDummyCheckout, clearDiagnosticEventLogs } from '/src/js/admin_diagnostics.js';
+
+    // Map diagnostic methods globally so index inline handlers can execute them
+    window.initDiagnosticsView = initDiagnosticsView;
+    window.runDiagnosticPipeline = runDiagnosticPipeline;
+    window.simulateDummyCheckout = simulateDummyCheckout;
+    window.clearDiagnosticEventLogs = clearDiagnosticEventLogs;
+
+    let allOrders = [];
+    let filteredOrders = [];
+    
+    // Live support chat state variables
+    let selectedChatUserId = null;
+    let currentMessagesListenerRef = null;
+
+    // Listen to Support Chat Metadata changes (live converse list)
+    window.initSupportChatsListener = function() {
+      if (!db) return;
+      db.ref('support_chats').on('value', (snapshot) => {
+        const data = snapshot.val() || {};
+        const container = document.getElementById('chatUsersList');
+        if (!container) return;
+        
+        container.innerHTML = '';
+        const chatsList = [];
+        
+        for (const uid in data) {
+          const chat = data[uid];
+          if (chat.metadata) {
+            chatsList.push({
+              userId: uid,
+              ...chat.metadata
+            });
+          }
+        }
+        
+        // Sort by the last message timestamp descending
+        chatsList.sort((a,b) => new Date(b.lastTime || 0) - new Date(a.lastTime || 0));
+        
+        if (chatsList.length === 0) {
+          container.innerHTML = `<div class="empty-msg" style="padding: 30px; text-align: center; color: var(--gray); font-size: 13px;">No active support tickets.</div>`;
+          return;
+        }
+        
+        chatsList.forEach(chat => {
+          const div = document.createElement('div');
+          div.className = `support-user-item ${selectedChatUserId === chat.userId ? 'active' : ''}`;
+          
+          const unreadHTML = chat.unreadCount > 0 
+            ? `<span style="background: var(--red); color: white; border-radius: 10px; padding: 2px 8px; font-size: 10px; font-weight: bold; font-family: var(--font-mono);">${chat.unreadCount}</span>` 
+            : '';
+            
+          const msgPreview = chat.lastMsg || 'No message contents.';
+          const lastTimeStr = chat.lastTime ? new Date(chat.lastTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
+            
+          div.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+              <div style="flex: 1; min-width: 0; padding-right: 8px;">
+                <strong style="color: var(--white); font-size: 13px; display: block; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">${chat.userName || 'Anonymous Client'}</strong>
+                <span style="font-size: 11px; color: var(--gray); display: block; margin-top: 2px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">
+                  ${msgPreview}
+                </span>
+              </div>
+              <div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;">
+                <span style="font-size: 9px; color: var(--gray); font-family: var(--font-mono);">${lastTimeStr}</span>
+                ${unreadHTML}
+              </div>
+            </div>
+          `;
+          
+          div.onclick = () => selectSupportChat(chat.userId, chat.userName, chat.userEmail);
+          container.appendChild(div);
+        });
+        
+        // Keep active headers up to date
+        if (selectedChatUserId && data[selectedChatUserId] && data[selectedChatUserId].metadata) {
+          const activeMeta = data[selectedChatUserId].metadata;
+          const nameEl = document.getElementById('chatActiveUserName');
+          const emailEl = document.getElementById('chatActiveUserEmail');
+          if (nameEl) nameEl.innerText = activeMeta.userName || 'Anonymous Client';
+          if (emailEl) emailEl.innerText = activeMeta.userEmail || '';
+        }
+      });
+    };
+
+    window.selectSupportChat = function(userId, userName, userEmail) {
+      selectedChatUserId = userId;
+      
+      // Update sidebar list highlights
+      setTimeout(() => {
+        const listContainer = document.getElementById('chatUsersList');
+        if (listContainer) {
+          Array.from(listContainer.children).forEach(child => {
+            child.classList.remove('active');
+          });
+        }
+      }, 50);
+
+      // Reset presentation state display
+      const emptyView = document.getElementById('chatWorkspaceEmpty');
+      const activeView = document.getElementById('chatConsoleWidget');
+      if (emptyView) emptyView.style.display = 'none';
+      if (activeView) activeView.style.display = 'flex';
+      
+      const nameEl = document.getElementById('chatActiveUserName');
+      const emailEl = document.getElementById('chatActiveUserEmail');
+      if (nameEl) nameEl.innerText = userName || 'Anonymous Client';
+      if (emailEl) emailEl.innerText = userEmail || '';
+      
+      const inputEl = document.getElementById('chatConsoleInput');
+      if (inputEl) {
+        inputEl.value = '';
+        inputEl.focus();
+      }
+      
+      // Reset unread counts
+      db.ref(`support_chats/${userId}/metadata/unreadCount`).set(0).catch(()=>{});
+      
+      // Detach old listeners
+      if (currentMessagesListenerRef) {
+        currentMessagesListenerRef.off();
+      }
+      
+      // Connect live thread channel messages
+      const streamDiv = document.getElementById('chatConsoleMessages');
+      if (streamDiv) {
+        streamDiv.innerHTML = `<div style="text-align: center; color: var(--gray); font-size: 13px; padding-top: 40px; width: 100%;">Connecting to live stream...</div>`;
+      }
+      
+      currentMessagesListenerRef = db.ref(`support_chats/${userId}/messages`);
+      currentMessagesListenerRef.on('value', (snapshot) => {
+        if (!streamDiv) return;
+        streamDiv.innerHTML = '';
+        const val = snapshot.val() || {};
+        const msgList = Object.values(val);
+        
+        if (msgList.length === 0) {
+          streamDiv.innerHTML = `<div style="text-align: center; color: var(--gray); font-size: 13px; padding-top: 40px; width: 100%;">No messages on this ticket yet.</div>`;
+          return;
+        }
+        
+        msgList.forEach(m => {
+          const bubble = document.createElement('div');
+          const senderClass = m.sender || 'user'; // 'user', 'admin'/support, 'bot'
+          bubble.className = `chat-bubble-admin ${senderClass}`;
+          
+          const timeText = m.time 
+            ? new Date(m.time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) 
+            : '';
+            
+          let senderLabel = '';
+          if (senderClass === 'admin') senderLabel = '👤 CUSTOMER REPRESENTATIVE';
+          else if (senderClass === 'bot') senderLabel = '🐾 PAWDROP AI COACH';
+          else senderLabel = '👤 CUSTOMER';
+          
+          bubble.innerHTML = `
+            <div style="font-size: 9px; font-weight: bold; opacity: 0.6; margin-bottom: 4px; font-family: var(--font-mono);">${senderLabel}</div>
+            <div style="word-break: break-all;">${m.text}</div>
+            <div style="font-size: 8px; opacity: 0.5; text-align: right; margin-top: 4px; font-family: var(--font-mono);">${timeText}</div>
+          `;
+          streamDiv.appendChild(bubble);
+        });
+        
+        setTimeout(() => {
+          streamDiv.scrollTop = streamDiv.scrollHeight;
+        }, 50);
+      });
+    };
+
+    window.sendAdminSupportReply = async function(event) {
+      if (event) event.preventDefault();
+      if (!selectedChatUserId) return;
+      
+      const input = document.getElementById('chatConsoleInput');
+      if (!input) return;
+      const text = input.value.trim();
+      if (!text) return;
+      
+      input.value = '';
+      
+      try {
+        const msgRef = db.ref(`support_chats/${selectedChatUserId}/messages`).push();
+        await msgRef.set({
+          sender: 'admin',
+          text: text,
+          time: new Date().toISOString()
+        });
+        
+        await db.ref(`support_chats/${selectedChatUserId}/metadata`).update({
+          lastMsg: text,
+          lastTime: new Date().toISOString(),
+          unreadCount: 0
+        });
+      } catch(err) {
+        console.error("Admin support send error:", err);
+        showAdminToast("Failed delivering response to Firebase support server.", "error");
+      }
+    };
+    
+    // Listen to real-time products updates from Firebase
+    window.addEventListener('pawdrop-products-updated', () => {
+      try {
+        if (typeof populateProducts === 'function') {
+          populateProducts();
+        }
+        if (typeof renderImportedProducts === 'function') {
+          renderImportedProducts();
+        }
+      } catch (err) {
+        console.warn("Could not reload products on real-time update:", err);
+      }
+    });
+
+    // Pagination parameters
+    let ordersCurrentPage = 1;
+    const ordersPerPage = 10;
+
+    // Toast triggers
+    window.showAdminToast = function(message, type = 'success') {
+      const container = document.getElementById('adminToastContainer');
+      if(!container) return;
+      
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      if (type === 'error') toast.style.borderLeftColor = 'var(--red)';
+      if (type === 'info') toast.style.borderLeftColor = 'var(--blue)';
+      
+      toast.innerHTML = `
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span>${type === 'success' ? '⚡' : type === 'error' ? '⚠️' : 'ℹ️'}</span>
+          <span>${message}</span>
+        </div>
+      `;
+      container.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(-10px)';
+        setTimeout(() => toast.remove(), 250);
+      }, 3000);
+    };
+
+    // Global order details side drawer
+    window.currentActiveDrawerOrderId = null;
+
+    window.openOrderDetails = function(orderId) {
+      const o = allOrders.find(item => item.id === orderId);
+      if(!o) {
+        showAdminToast("Order details could not be parsed.", "error");
+        return;
+      }
+
+      window.currentActiveDrawerOrderId = orderId;
+
+      document.getElementById('drawerOrderId').innerText = '#' + o.id;
+      document.getElementById('drawerOrderDate').innerText = new Date(o.date).toLocaleString();
+      
+      const statusBadge = document.getElementById('drawerOrderStatusBadge');
+      statusBadge.className = `status-badge ${o.status}`;
+      statusBadge.innerText = o.status.replace('_', ' ');
+
+      // Set input controls with sync states
+      const statusSelect = document.getElementById('drawerOrderStatusUpdate');
+      if (statusSelect) {
+        statusSelect.value = o.status;
+      }
+
+      const trackingSec = document.getElementById('drawerTrackingSection');
+      if (trackingSec) {
+        trackingSec.style.display = (o.status === 'shipped' || o.status === 'delivered') ? 'flex' : 'none';
+      }
+
+      const tNumInput = document.getElementById('drawerTrackingNum');
+      const tCarrierInput = document.getElementById('drawerTrackingCarrier');
+      if (tNumInput && tCarrierInput) {
+        tNumInput.value = o.tracking?.number || '';
+        tCarrierInput.value = o.tracking?.carrier || '';
+      }
+
+      document.getElementById('drawerOrderCJId').innerText = o.cjOrderId ? o.cjOrderId : 'Not sent' ;
+      document.getElementById('drawerCustomerName').innerText = o.customer?.name || 'Anonymous client';
+      document.getElementById('drawerCustomerEmail').innerText = o.customer?.email || '-';
+      document.getElementById('drawerCustomerPhone').innerText = o.customer?.phone || '-';
+      
+      const address = o.customer?.address || {};
+      const fullAddress = `${address.line1 || address || ''}, ${address.city || ''}, ${address.state || ''} ${address.postal || ''}`;
+      document.getElementById('drawerCustomerAddress').innerText = fullAddress || 'Direct Pickup';
+
+      // Items list inside drawer
+      const listContainer = document.getElementById('drawerItemList');
+      listContainer.innerHTML = '';
+      
+      const listItems = o.items || [];
+      listItems.forEach(item => {
+        const itemWrap = document.createElement('div');
+        itemWrap.style.display = 'flex';
+        itemWrap.style.alignItems = 'center';
+        itemWrap.style.gap = '12px';
+        itemWrap.style.padding = '8px';
+        itemWrap.style.backgroundColor = 'rgba(255,255,255,0.02)';
+        itemWrap.style.borderRadius = '4px';
+        itemWrap.innerHTML = `
+          <img src="${item.img || 'https://images.unsplash.com/photo-1541599540903-216a46ca1fc0?w=100'}" alt="${item.name}" style="width:40px; height:40px; object-fit:cover; border-radius:3px;" />
+          <div style="flex:1;">
+            <div style="font-size:12px; font-weight:500; color:var(--white);">${item.name}</div>
+            <div style="font-size:11px; color:var(--gray); margin-top:2px;">Qty: ${item.qty || 1}</div>
+          </div>
+          <div style="font-size:12px; font-family:var(--font-mono); font-weight:700;">$${Number(item.price).toFixed(2)}</div>
+        `;
+        listContainer.appendChild(itemWrap);
+      });
+
+      document.getElementById('drawerTotal').innerText = '$' + Number(o.total || 0).toFixed(2);
+
+      const deleteContainer = document.getElementById('drawerDeleteContainer');
+      if (deleteContainer) {
+        if (o.status === 'delivered' || o.status === 'canceled' || o.status === 'cancelled') {
+          deleteContainer.style.display = 'block';
+        } else {
+          deleteContainer.style.display = 'none';
+        }
+      }
+
+      document.getElementById('detailDrawerOverlay').classList.add('active');
+      document.getElementById('detailDrawer').classList.add('active');
+    };
+
+    window.closeOrderDrawer = function() {
+      document.getElementById('detailDrawer').classList.remove('active');
+      document.getElementById('detailDrawerOverlay').classList.remove('active');
+      window.currentActiveDrawerOrderId = null;
+    };
+
+    window.deleteCurrentOrderFromDrawer = async function() {
+      const orderId = window.currentActiveDrawerOrderId;
+      if (!orderId) return;
+
+      if (!confirm(`Are you sure you want to permanently delete order ${orderId} from Firestore? This action is irreversible. \n\nআপনি কি নিশ্চিত যে আপনি Firestore থেকে এই অর্ডারটি স্থায়ীভাবে ডিলিট করতে চান?`)) return;
+
+      try {
+        window.closeOrderDrawer();
+        await realtime.deleteOrder(orderId);
+        showAdminToast(`Order ${orderId} has been successfully deleted!`, "success");
+      } catch (err) {
+        showAdminToast("Failed to delete order. Please check permissions or database connection.", "error");
+      }
+    };
+
+    window.updateDrawerOrderFulfillmentStatus = async function() {
+      const orderId = window.currentActiveDrawerOrderId;
+      if (!orderId) return;
+
+      const statusSelect = document.getElementById('drawerOrderStatusUpdate');
+      if (!statusSelect) return;
+
+      const newStatus = statusSelect.value;
+      try {
+        await realtime.updateOrder(orderId, { status: newStatus });
+        showAdminToast(`Order ${orderId} updated to ${newStatus.toUpperCase()}`, "success");
+
+        await realtime.notify(`🛒 Order ${orderId} status changed to: ${newStatus}`, {
+          author: "Administrator",
+          status: newStatus
+        });
+
+        const trackingSec = document.getElementById('drawerTrackingSection');
+        if (trackingSec) {
+          trackingSec.style.display = (newStatus === 'shipped' || newStatus === 'delivered') ? 'flex' : 'none';
+        }
+      } catch (err) {
+        console.error("Fulfillment status write failed", err);
+        showAdminToast("Could not save status modification to database.", "error");
+      }
+    };
+
+    window.saveDrawerTracking = async function() {
+      const orderId = window.currentActiveDrawerOrderId;
+      if (!orderId) return;
+
+      const tNumInput = document.getElementById('drawerTrackingNum');
+      const tCarrierInput = document.getElementById('drawerTrackingCarrier');
+      if (!tNumInput || !tCarrierInput) return;
+
+      const number = tNumInput.value.trim();
+      const carrier = tCarrierInput.value.trim() || 'Standard Delivery';
+
+      if (!number) {
+        showAdminToast("Please input a tracking registration reference number first.", "error");
+        return;
+      }
+
+      try {
+        const trackingData = {
+          number,
+          carrier,
+          lastUpdated: new Date().toISOString()
+        };
+
+        await realtime.updateOrder(orderId, { tracking: trackingData });
+        showAdminToast(`Shipment tracked: ${carrier} #${number}`, "success");
+        
+        await realtime.notify(`📦 Shipment tracked for order ${orderId}: ${carrier} #${number}`, {
+          number,
+          carrier
+        });
+      } catch (err) {
+        console.error("Tracking details save failed", err);
+        showAdminToast("Could not save tracking details to database.", "error");
+      }
+    };
+
+    // Client CRM aggregations
+    function populateCRM() {
+      const body = document.getElementById('crmTableBody');
+      if(!body) return;
+      body.innerHTML = '';
+
+      const customersMap = {};
+      allOrders.forEach(o => {
+        const email = o.customer?.email || 'unknown';
+        if (!customersMap[email]) {
+          customersMap[email] = {
+            name: o.customer?.name || 'Anonymous',
+            email: email,
+            phone: o.customer?.phone || '-',
+            orders: 0,
+            spent: 0
+          };
+        }
+        customersMap[email].orders++;
+        customersMap[email].spent += Number(o.total || 0);
+      });
+
+      const customerList = Object.values(customersMap);
+      if(customerList.length === 0) {
+        body.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--gray); padding:30px;">No transaction records found.</td></tr>`;
+        return;
+      }
+
+      customerList.forEach(c => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong>${c.name}</strong></td>
+          <td>${c.email}</td>
+          <td>${c.phone}</td>
+          <td style="text-align:right; font-family:var(--font-mono);">${c.orders}</td>
+          <td style="text-align:right; font-family:var(--font-mono); color:var(--neon); font-weight:bold;">$${c.spent.toFixed(2)}</td>
+        `;
+        body.appendChild(tr);
+      });
+    }
+
+    // Dynamic Filter & Pagination system for Orders lookup
+    function filterAndPaginateOrders() {
+      const q = document.getElementById('orderSearchQuery').value.toLowerCase().trim();
+      const statusValue = document.getElementById('orderStatusSelector').value;
+      const start = document.getElementById('orderStartDate').value;
+      const end = document.getElementById('orderEndDate').value;
+
+      filteredOrders = allOrders.filter(o => {
+        const matchesQuery = o.id.toLowerCase().includes(q) || 
+                             (o.customer?.name && o.customer.name.toLowerCase().includes(q)) ||
+                             (o.customer?.email && o.customer.email.toLowerCase().includes(q));
+
+        const matchesStatus = (statusValue === 'all' || o.status === statusValue);
+
+        let matchesDate = true;
+        if (start) {
+          matchesDate = matchesDate && (new Date(o.date) >= new Date(start + "T00:00:00"));
+        }
+        if (end) {
+          matchesDate = matchesDate && (new Date(o.date) <= new Date(end + "T23:59:59"));
+        }
+
+        return matchesQuery && matchesStatus && matchesDate;
+      });
+
+      // Render pagination table viewport
+      const totalCount = filteredOrders.length;
+      const totalPages = Math.ceil(totalCount / ordersPerPage) || 1;
+      if (ordersCurrentPage > totalPages) ordersCurrentPage = totalPages;
+
+      const startIndex = (ordersCurrentPage - 1) * ordersPerPage;
+      const endIndex = Math.min(startIndex + ordersPerPage, totalCount);
+      const sliced = filteredOrders.slice(startIndex, endIndex);
+
+      const tableBody = document.getElementById('filteredOrdersBody');
+      tableBody.innerHTML = '';
+
+      if (sliced.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--gray); padding:40px;">No records matched your filters.</td></tr>`;
+      } else {
+        sliced.forEach(o => {
+          const isDeletable = o.status === 'delivered' || o.status === 'canceled' || o.status === 'cancelled';
+          const deleteBtnHtml = isDeletable ? `
+            <button class="outline-btn js-delete-btn" style="padding:4px 8px; border-color: #ef4444; color: #ef4444;" data-id="${o.id}">DELETE</button>
+          ` : '';
+
+          const tr = document.createElement('tr');
+          tr.className = 'stagger-row';
+          tr.innerHTML = `
+            <td style="font-family:var(--font-mono); font-weight:bold; color:var(--neon);">${o.id}</td>
+            <td><strong>${o.customer?.name || 'Anonymous'}</strong><div style="font-size:11px;color:var(--gray);">${o.customer?.email || ''}</div></td>
+            <td style="font-family:var(--font-mono); font-weight:bold;">$${Number(o.total || 0).toFixed(2)}</td>
+            <td><span class="status-badge ${o.status}">● ${o.status.replace('_', ' ')}</span></td>
+            <td style="font-size:12px; color:var(--gray);">${new Date(o.date).toLocaleString()}</td>
+            <td>
+              <div class="action-btn-group">
+                <button class="outline-btn" style="padding:4px 8px;" onclick="openOrderDetails('${o.id}')">VIEW</button>
+                <button class="outline-btn js-sync-btn" style="padding:4px 8px;" data-id="${o.id}">SYNC</button>
+                ${deleteBtnHtml}
+              </div>
+            </td>
+          `;
+          tableBody.appendChild(tr);
+        });
+
+        // Add action listeners to sync buttons dynamically
+        tableBody.querySelectorAll('.js-sync-btn').forEach(btn => {
+          btn.addEventListener('click', async (e) => {
+            const btnEl = e.currentTarget;
+            btnEl.innerText = 'SYNCING...';
+            try {
+              await orderManager.syncTracking(btnEl.dataset.id);
+              showAdminToast("Order tracking synced successfully with CJ!", "success");
+            } catch(e) {
+              showAdminToast("Failed to connect with sync gateways.", "error");
+            } finally {
+              btnEl.innerText = 'SYNC';
+            }
+          });
+        });
+
+        // Add action listeners to delete buttons dynamically
+        tableBody.querySelectorAll('.js-delete-btn').forEach(btn => {
+          btn.addEventListener('click', async (e) => {
+            const btnEl = e.currentTarget;
+            const orderId = btnEl.dataset.id;
+            if (!confirm(`Are you sure you want to permanently delete order ${orderId} from Firestore? This action is irreversible. \n\nআপনি কি নিশ্চিত যে আপনি Firestore থেকে এই অর্ডারটি স্থায়ীভাবে ডিলিট করতে চান?`)) return;
+            
+            btnEl.innerText = 'DELETING...';
+            btnEl.disabled = true;
+            try {
+              await realtime.deleteOrder(orderId);
+              showAdminToast(`Order ${orderId} has been successfully deleted!`, "success");
+            } catch(e) {
+              showAdminToast("Failed to delete order. Please check permissions or database connection.", "error");
+              btnEl.innerText = 'DELETE';
+              btnEl.disabled = false;
+            }
+          });
+        });
+      }
+
+      // Render pagination details
+      document.getElementById('paginationInfo').innerText = `Showing ${totalCount === 0 ? 0 : startIndex + 1} to ${endIndex} of ${totalCount} entries`;
+      
+      const controls = document.getElementById('paginationControls');
+      controls.innerHTML = '';
+
+      // Prev
+      const prevBtn = document.createElement('button');
+      prevBtn.className = 'outline-btn';
+      prevBtn.innerText = '←';
+      prevBtn.disabled = ordersCurrentPage === 1;
+      prevBtn.style.opacity = ordersCurrentPage === 1 ? '0.4' : '1';
+      prevBtn.addEventListener('click', () => {
+        ordersCurrentPage--;
+        filterAndPaginateOrders();
+      });
+      controls.appendChild(prevBtn);
+
+      // Page numbers list
+      for (let i = 1; i <= totalPages; i++) {
+        const pageBtn = document.createElement('button');
+        pageBtn.className = `outline-btn ${ordersCurrentPage === i ? 'active' : ''}`;
+        pageBtn.style.padding = '4px 10px';
+        if (ordersCurrentPage === i) {
+          pageBtn.style.backgroundColor = 'var(--neon)';
+          pageBtn.style.color = '#000000';
+        }
+        pageBtn.innerText = i;
+        pageBtn.addEventListener('click', () => {
+          ordersCurrentPage = i;
+          filterAndPaginateOrders();
+        });
+        controls.appendChild(pageBtn);
+      }
+
+      // Next
+      const nextBtn = document.createElement('button');
+      nextBtn.className = 'outline-btn';
+      nextBtn.innerText = '→';
+      nextBtn.disabled = ordersCurrentPage === totalPages;
+      nextBtn.style.opacity = ordersCurrentPage === totalPages ? '0.4' : '1';
+      nextBtn.addEventListener('click', () => {
+        ordersCurrentPage++;
+        filterAndPaginateOrders();
+      });
+      controls.appendChild(nextBtn);
+
+      // Stagger GSAP row animations for full page loads
+      gsap.fromTo('.stagger-row', { opacity:0, x: -6 }, { opacity:1, x:0, duration:0.4, stagger:0.04, ease: 'power2.out' });
+    }
+
+    // Export list to CSV file
+    function exportOrdersToCSV() {
+      if(filteredOrders.length === 0) {
+        showAdminToast("There are no filtered orders to export.", "error");
+        return;
+      }
+      
+      let csv = "data:text/csv;charset=utf-8,";
+      csv += "Order ID,Customer Name,Customer Email,Total,Status,Date\r\n";
+      
+      filteredOrders.forEach(o => {
+        const row = [
+          o.id,
+          `"${o.customer?.name || ''}"`,
+          `"${o.customer?.email || ''}"`,
+          o.total,
+          o.status,
+          `"${new Date(o.date).toISOString()}"`
+        ].join(",");
+        csv += row + "\r\n";
+      });
+
+      const link = document.createElement("a");
+      link.setAttribute("href", encodeURI(csv));
+      link.setAttribute("download", `pawdrop_orders_report_${new Date().toISOString().slice(0,10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showAdminToast("CSV report generated and downloaded!", "success");
+    }
+
+    // Static Products listings browse catalog tab
+    const standardProducts = [
+      { id: 1, name: "Premium Ergonomic Memory Foam Bed", category: "COMFORT", price: 49.99, rating: 4.8, img: "https://images.unsplash.com/photo-1541599540903-216a46ca1fc0?w=500" },
+      { id: 2, name: "Dual-Laser Smart Teaser Rotating Toy", category: "PLAY", price: 24.95, rating: 4.9, img: "https://images.unsplash.com/photo-1545249390-6bdfa286032f?w=500" },
+      { id: 3, name: "Slow-Feeder Safety Organic Bamboo Bowl", category: "FEEDING", price: 14.99, rating: 4.6, img: "https://images.unsplash.com/photo-1576201836106-db1758fd1c97?w=500" },
+      { id: 4, name: "Reflective Heavy-Duty Safety Outdoor Leash", category: "SAFETY", price: 18.50, rating: 4.7, img: "https://images.unsplash.com/photo-1601758174114-e711c0cbaa69?w=500" }
+    ];
+
+    window.refreshCloudSqlStatus = async function() {
+      const badge = document.getElementById('cloudsql-status-badge');
+      const dtitle = document.getElementById('cloudsql-status-title');
+      const dsubtitle = document.getElementById('cloudsql-status-subtitle');
+      const dcount = document.getElementById('cloudsql-status-count');
+
+      if (!badge) return;
+
+      try {
+        const res = await fetch('/api/inventory/status');
+        const data = await res.json();
+        if (data.success) {
+          if (data.configured) {
+            badge.innerText = "🟢 RELATIONAL ACTIVE";
+            badge.style.background = "rgba(46, 213, 115, 0.2)";
+            badge.style.color = "#2ed573";
+            badge.style.border = "1px solid #2ed573";
+          } else {
+            badge.innerText = "🟡 FALLBACK MODE";
+            badge.style.background = "rgba(255, 159, 26, 0.2)";
+            badge.style.color = "#ff9f1a";
+            badge.style.border = "1px solid #ff9f1a";
+          }
+
+          dtitle.innerText = data.status;
+          dsubtitle.innerText = `Driver: ${data.driver} | Region: ${data.region} | State: ${data.resilientFallbackState}`;
+          dcount.innerText = data.catalogCount;
+        }
+      } catch(e) {
+        badge.innerText = "🔴 DISCONNECTED";
+        badge.style.background = "rgba(235, 77, 75, 0.2)";
+        badge.style.color = "#eb4d4b";
+        badge.style.border = "1px solid #eb4d4b";
+        dtitle.innerText = "Could not ping cloud database diagnostics API.";
+        dcount.innerText = "-";
+      }
+    };
+
+    window.updateDbProductStock = async function(id, newQty) {
+      try {
+        const qty = Number(newQty);
+        if (isNaN(qty) || qty < 0) {
+          showAdminToast("Please enter a valid stock level.", "warning");
+          return;
+        }
+
+        const res = await fetch('/api/inventory/update-stock', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id, quantity: qty })
+        });
+        if (!res.ok) throw new Error(await res.text());
+
+        const label = document.getElementById(`stock-val-${id}`);
+        if (label) {
+          label.innerText = `${qty} units`;
+          label.style.color = 'var(--neon)';
+          setTimeout(() => { label.style.color = '#fff'; }, 1000);
+        }
+
+        showAdminToast(`Stock updated to ${qty} in Cloud SQL!`, "success");
+        refreshCloudSqlStatus();
+      } catch(err) {
+        console.error("Stock adjust failed:", err);
+        showAdminToast("Could not adjust stock: " + err.message, "error");
+      }
+    };
+
+    window.populateProducts = async function() {
+      const grid = document.getElementById('productsListGrid');
+      if(!grid) return;
+      
+      grid.innerHTML = '<div style="color: var(--gray); font-family: var(--font-mono); font-size:12px; padding:20px;">Fetching live relational catalog...</div>';
+      
+      // Update the network diagnostic panel badge immediately
+      refreshCloudSqlStatus();
+
+      try {
+        const response = await fetch('/api/inventory');
+        if (!response.ok) throw new Error(await response.text());
+        const data = await response.json();
+        let productsList = data.products || [];
+
+        // Filter out locally and Firebase-deleted products to persist across transient server resets
+        let deletedIds = [];
+        try {
+          const delRaw = localStorage.getItem('pawdrop_deleted_products');
+          if (delRaw) {
+            deletedIds = JSON.parse(delRaw).map(id => String(id).trim());
+          }
+        } catch (e) {}
+
+        productsList = productsList.filter(p => {
+          const idStr = String(p.id).trim();
+          const cjPidStr = String(p.cjPid || p.cj_pid || '').trim();
+          const isDeleted = deletedIds.includes(idStr) || (cjPidStr && deletedIds.includes(cjPidStr));
+          return !isDeleted;
+        });
+
+        if (productsList.length === 0) {
+          grid.innerHTML = '<div style="color: var(--gray); font-family: var(--font-mono); font-size:12px; padding:20px;">No inventory items found in relational catalog. Sync a dropshipped product to configure listings.</div>';
+          return;
+        }
+
+        grid.innerHTML = '';
+        productsList.forEach(p => {
+          const card = document.createElement('div');
+          card.style.backgroundColor = 'var(--black-2)';
+          card.style.border = '1px solid var(--border)';
+          card.style.borderRadius = '4px';
+          card.style.overflow = 'hidden';
+          card.style.display = 'flex';
+          card.style.flexDirection = 'column';
+          card.className = 'stagger-prod';
+          
+          const isImported = !!p.cjPid;
+          const cjPid = p.cjPid || '';
+
+          card.innerHTML = `
+            <div style="height:160px; overflow:hidden; position:relative;">
+              <img src="${p.img || 'https://picsum.photos/600/400?random=11'}" alt="${p.name}" style="width:100%; height:100%; object-fit:cover;" referrerpolicy="no-referrer" />
+              <span style="position:absolute; top:12px; left:12px; background-color:black; color:var(--neon); font-size:10px; font-weight:700; padding:3px 8px; border-radius:2px; font-family:var(--font-mono); border:1px solid var(--border);">${p.category}</span>
+            </div>
+            <div style="padding:20px; display:flex; flex-direction:column; gap:12px; flex:1;">
+              <h4 style="font-size:14px; font-weight:700; color:var(--white); line-height:1.4;">${p.name}</h4>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-top:auto;">
+                <span style="font-size:16px; font-family:var(--font-mono); font-weight:bold; color:var(--neon);">$${Number(p.price).toFixed(2)}</span>
+                <span style="font-size:12px; color:var(--gray);">★ ${Number(p.rating || 4.5).toFixed(1)}</span>
+              </div>
+              
+              <button class="outline-btn" style="border-color: #ef4444; color: #ef4444; width: 100%; margin-top: 8px; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 11px; padding: 6px 12px; height: 32px; transition: all 0.2s; cursor:pointer;" onclick="deleteProduct(${p.id}, ${isImported}, '${cjPid}')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 12px; height: 12px;"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                Purge Listing
+              </button>
+            </div>
+            
+            <!-- Scalable Inventory Management Block -->
+            <div style="background: var(--black); border-top: 1px solid var(--border); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap:8px;">
+              <div style="display: flex; flex-direction: column; gap: 2px;">
+                <span style="font-size: 8px; font-family: var(--font-mono); color: var(--gray); text-transform: uppercase;">Stock Level</span>
+                <span id="stock-val-${p.id}" style="font-size: 13px; font-weight: 700; color: var(--white); font-family: var(--font-mono);">${p.quantity ?? 100} units</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 4px;">
+                <input type="number" id="inp-stock-${p.id}" value="${p.quantity ?? 100}" min="0" max="9999" style="width: 58px; background: var(--black-2); border: 1px solid var(--border); padding: 4px 6px; font-size: 12px; text-align: center; color: #fff; font-family:var(--font-mono); outline: none; border-radius: 3px;" />
+                <button onclick="updateDbProductStock(${p.id}, document.getElementById('inp-stock-${p.id}').value)" class="outline-btn" style="height: 26px; font-size: 10px; font-weight: bold; background: #fff !important; color:#000 !important; border:none; padding: 4px 8px; border-radius: 3px; cursor: pointer; transition: all 0.1s;">Modify</button>
+              </div>
+            </div>
+          `;
+          grid.appendChild(card);
+        });
+        
+        gsap.fromTo('.stagger-prod', { opacity:0, scale:0.95 }, { opacity:1, scale:1, duration:0.35, stagger:0.04, ease:'power2.out' });
+      } catch (err) {
+        console.error("Failed loading inventory from Postgres database layout:", err);
+        grid.innerHTML = '<div style="color: var(--red); font-family: var(--font-mono); font-size:12px; padding:20px;">Could not connect to relational catalog pipeline. Double check settings and try again.</div>';
+      }
+    };
+
+    window.deleteProduct = async function(id, isImported, cj_pid) {
+      if (!confirm("Are you sure you want to delete this product? নিশ্চিত আপনি এই প্রোডাক্টটি ডিলিট করতে চান?")) return;
+
+      try {
+        // 1. Delete from Cloud SQL Server Endpoints
+        await fetch('/api/inventory/delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: id })
+        });
+
+        // 2. Fallbacks update
+        let deletedIds = [];
+        try {
+          const delRaw = localStorage.getItem('pawdrop_deleted_products');
+          if (delRaw) {
+            deletedIds = JSON.parse(delRaw).map(id => String(id).trim());
+          }
+        } catch(e){}
+
+        if (!deletedIds.includes(String(id).trim())) {
+          deletedIds.push(String(id).trim());
+        }
+        if (cj_pid && !deletedIds.includes(String(cj_pid).trim())) {
+          deletedIds.push(String(cj_pid).trim());
+        }
+        localStorage.setItem('pawdrop_deleted_products', JSON.stringify(deletedIds));
+
+        // Sync deletion status permanently to Firebase
+        try {
+          await db.ref('deleted_products/' + id).set(true);
+          if (cj_pid) {
+            await db.ref('deleted_products/' + cj_pid).set(true);
+          }
+        } catch(fbErr) {
+          console.warn("Could not save deletion status to Firebase:", fbErr);
+        }
+
+        // If imported, also prune from imported products list & Firebase realtime database 
+        if (isImported) {
+          const imported = localStorage.getItem('pawdrop_imported_products');
+          if (imported) {
+            const parsed = JSON.parse(imported);
+            const filtered = parsed.filter(item => {
+              const matchesNum = Number(item.id) === Number(id);
+              const matchesCj = cj_pid && String(item.cj_pid || item.cjPid || '').trim() === String(cj_pid).trim();
+              return !matchesNum && !matchesCj;
+            });
+            localStorage.setItem('pawdrop_imported_products', JSON.stringify(filtered));
+          }
+
+          if (cj_pid) {
+            try {
+              await db.ref('products/' + cj_pid).remove();
+            } catch(fbErr){
+              console.warn("Could not delete from Firebase", fbErr);
+            }
+          }
+        }
+        
+        // Unconditionally delete by numeric ID too (handles standard seeded products and index duplicates)
+        try {
+          await db.ref('products/' + id).remove();
+        } catch(fbErr) {
+          console.warn("Could not prune numeric ID from Firebase Realtime Database node:", fbErr);
+        }
+
+        showAdminToast("Product deleted from relational database successfully!", "success");
+        populateProducts();
+
+        if (typeof window !== 'undefined' && window.parent) {
+          try {
+            window.parent.postMessage({ type: 'PAWDROP_REFRESH_INVENTORY' }, '*');
+          } catch(e){}
+        }
+      } catch (err) {
+        showAdminToast("An error occurred during deletion: " + err.message, "error");
+      }
+    };
+
+    // Realtime digital clock update
+    function updateClock() {
+      const clock = document.getElementById('currentTime');
+      if (clock) {
+        clock.innerText = new Date().toLocaleTimeString() + ' (UTC)';
+      }
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Stats count-up helper
+    function runCountUp(id, value, prefix = "", suffix = "", decimals = 0) {
+      const el = document.getElementById(id);
+      if(!el) return;
+      
+      const obj = { val: 0 };
+      gsap.to(obj, {
+        val: value,
+        duration: 1.2,
+        ease: "power2.out",
+        onUpdate: () => {
+          el.innerText = prefix + obj.val.toFixed(decimals) + suffix;
+        }
+      });
+    }
+
+    // Listen to Firebase stats modifications
+    let lastStatsOrders = null;
+    let lastStatsRevenue = null;
+    let lastStatsToday = null;
+
+    realtime.listenToStats((stats) => {
+      if(!stats) return;
+      const total = stats.totalOrders || 0;
+      const rev = stats.totalRevenue || 0;
+      const today = stats.todayOrders || 0;
+      const visitorsCount = stats.visitors || Math.floor(1340 + total * 4.4);
+
+      if (total !== lastStatsOrders) {
+        runCountUp('statOrders', total);
+        lastStatsOrders = total;
+      }
+      if (rev !== lastStatsRevenue) {
+        runCountUp('statRevenue', rev, "$", "", 2);
+        lastStatsRevenue = rev;
+      }
+      if (today !== lastStatsToday) {
+        runCountUp('statNewOrders', today);
+        runCountUp('statOrdersSub', today, "+", " today");
+        lastStatsToday = today;
+      }
+      document.getElementById('statVisitors').innerText = Number(visitorsCount).toLocaleString();
+    });
+
+    // Realtime Orders Synchronization and Listeners
+    let initializedAlerts = false;
+    realtime.listenToAllOrders((orders) => {
+      allOrders = orders;
+      
+      // Update dynamic parts
+      populateCRM();
+      filterAndPaginateOrders();
+
+      // Live details drawer synchronizer if it's currently open
+      if (window.currentActiveDrawerOrderId && document.getElementById('detailDrawer') && document.getElementById('detailDrawer').classList.contains('active')) {
+        const openedOrder = orders.find(item => item.id === window.currentActiveDrawerOrderId);
+        if (openedOrder) {
+          const statusBadge = document.getElementById('drawerOrderStatusBadge');
+          if (statusBadge) {
+            statusBadge.className = `status-badge ${openedOrder.status}`;
+            statusBadge.innerText = openedOrder.status.replace('_', ' ');
+          }
+          const statusSelect = document.getElementById('drawerOrderStatusUpdate');
+          if (statusSelect && statusSelect.value !== openedOrder.status) {
+            statusSelect.value = openedOrder.status;
+          }
+          const trackingSec = document.getElementById('drawerTrackingSection');
+          if (trackingSec) {
+            trackingSec.style.display = (openedOrder.status === 'shipped' || openedOrder.status === 'delivered') ? 'flex' : 'none';
+          }
+        }
+      }
+
+      // Check for new order alert toast notifications (after initialization)
+      if (initializedAlerts) {
+        // Compare with existing list length or trigger alert if a new record appears
+        showAdminToast(`Real-time: Order Pipeline Updated (${orders.length} orders total)`, 'info');
+      }
+      initializedAlerts = true;
+
+      // Handle empty tables for main dashboard body
+      const tbody = document.getElementById('ordersTableBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      if (orders.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" style="text-align: center; color: var(--gray); padding: 48px 10px;">
+              <div style="font-size:24px; margin-bottom:8px;">📦</div>
+              <strong style="font-family:var(--font-display); font-size:12px; letter-spacing:0.05em;">NO ORDERS YET</strong>
+              <p style="font-size:11px; color:#555558; margin-top:4px;">Orders will appear here in real-time</p>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      // Sort & slice for the quick Dashboard dashboard list
+      const sorted = [...orders].sort((a,b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
+
+      sorted.forEach(o => {
+        const tr = document.createElement('tr');
+        tr.className = 'stagger-dash-row';
+        tr.innerHTML = `
+          <td style="font-family:var(--font-mono); font-weight:bold; color:var(--neon);">${o.id}</td>
+          <td><strong>${o.customer?.name || 'Anonymous'}</strong></td>
+          <td style="font-family:var(--font-mono); font-weight:bold; color:var(--white);">$${Number(o.total || 0).toFixed(2)}</td>
+          <td><span class="status-badge ${o.status}">● ${o.status.replace('_', ' ')}</span></td>
+          <td style="font-size:12px; color:var(--gray); font-family:var(--font-mono);">${new Date(o.date).toLocaleDateString()}</td>
+          <td>
+            <div class="action-btn-group">
+              <button class="outline-btn" style="padding:4px 8px;" onclick="openOrderDetails('${o.id}')">VIEW</button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      gsap.fromTo('.stagger-dash-row', { opacity:0, x: -6 }, { opacity:1, x:0, duration:0.35, stagger:0.03, ease:'power2.out' });
+    });
+
+    // Notifications and real-time live feed synchronizer
+    realtime.listenToNotifications((notifs) => {
+      const parent = document.getElementById('notifList');
+      if(!parent) return;
+      parent.innerHTML = '';
+
+      // Notification counts inside Bell
+      document.getElementById('notifBadge').innerText = notifs.filter(n => !n.read).length || 0;
+
+      if(notifs.length === 0) {
+        parent.innerHTML = `
+          <div style="color: var(--gray); font-size: 11px; text-align: center; padding: 40px 10px;">
+            No notifications logged at this epoch.
+          </div>
+        `;
+        return;
+      }
+
+      notifs.slice(0, 10).forEach(n => {
+        const div = document.createElement('div');
+        div.className = 'feed-item';
+        
+        let borderCol = 'var(--neon)';
+        if (n.message.toLowerCase().includes('shipped')) borderCol = 'var(--blue)';
+        if (n.message.toLowerCase().includes('delivered')) borderCol = 'var(--green)';
+        
+        div.style.borderLeftColor = borderCol;
+        div.innerHTML = `
+          <div class="feed-text">${n.message || 'Notification sync alert'}</div>
+          <div class="feed-time">${new Date(n.time).toLocaleTimeString()} · ${new Date(n.time).toLocaleDateString()}</div>
+        `;
+        parent.appendChild(div);
+      });
+    });
+
+    // ============================================
+    // DYNAMIC EXPERT CJ DROP PRODUCT IMPORTER HANDLERS 
+    // ============================================
+
+    let activeImporterTab = 'fetch';
+    let currentFetchedProduct = null;
+
+    // Switch between Subviews
+    window.switchImporterTab = function(tabName) {
+      activeImporterTab = tabName;
+      document.querySelectorAll('.imp-tab').forEach(el => el.classList.remove('active'));
+      const activeBtn = document.getElementById('tab-' + tabName);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      if (tabName === 'fetch') {
+        document.getElementById('imp-view-fetch').style.display = 'block';
+        document.getElementById('imp-view-search').style.display = 'none';
+      } else {
+        document.getElementById('imp-view-fetch').style.display = 'none';
+        document.getElementById('imp-view-search').style.display = 'block';
+      }
+    };
+
+    // Fetch CJ Product Specifics by ID (PID)
+    window.fetchCJProductById = async function(pidParam) {
+      const pidInput = document.getElementById('impPidInput');
+      const pid = pidParam || (pidInput ? pidInput.value.trim() : '');
+
+      if (!pid) {
+        showAdminToast("Please provide a valid CJ Product ID", "error");
+        return;
+      }
+
+      const loader = document.getElementById('cjFetchLoader');
+      const errBox = document.getElementById('cjFetchError');
+      const preview = document.getElementById('cjProductPreview');
+
+      if (loader) loader.style.display = 'flex';
+      if (errBox) errBox.style.display = 'none';
+      if (preview) preview.style.display = 'none';
+
+      try {
+        console.log(`[CJ Admin] Calling endpoint: /api/cj/product/${pid}`);
+        const res = await fetch(`/api/cj/product/${pid}`);
+        const data = await res.json();
+
+        if (data.success && data.product) {
+          currentFetchedProduct = data.product;
+          
+          // Populate Form Preview
+          document.getElementById('prodPid').value = currentFetchedProduct.pid;
+          document.getElementById('prodName').value = currentFetchedProduct.name;
+          document.getElementById('prodCjPrice').value = `$${currentFetchedProduct.cjPrice.toFixed(2)}`;
+          document.getElementById('prodCategory').value = currentFetchedProduct.category || "COMFORT";
+          
+          // Render Image Carousel
+          const mainImg = document.getElementById('mainPreviewImg');
+          mainImg.src = currentFetchedProduct.image;
+          
+          const thumbsContainer = document.getElementById('previewThumbnails');
+          thumbsContainer.innerHTML = '';
+          
+          const imagesSet = currentFetchedProduct.images && currentFetchedProduct.images.length > 0 
+            ? currentFetchedProduct.images 
+            : [currentFetchedProduct.image];
+
+          imagesSet.slice(0, 5).forEach(imgUrl => {
+            const img = document.createElement('img');
+            img.className = 'thumb-img';
+            img.src = imgUrl;
+            img.referrerPolicy = 'no-referrer';
+            img.onclick = () => { mainImg.src = imgUrl; };
+            thumbsContainer.appendChild(img);
+          });
+
+          // Calculate Initial Profits
+          calculateRealtimeProfit();
+
+          if (preview) preview.style.display = 'grid';
+          showAdminToast(`Loaded specifications for ID: ${currentFetchedProduct.pid}`, "success");
+        } else {
+          throw new Error(data.message || "Failed to locate product");
+        }
+      } catch (err) {
+        console.error(err);
+        const errText = document.getElementById('cjFetchErrorText');
+        if (errText) errText.innerText = `Failed to contact API proxy. Resilient simulation triggered: ${err.message}`;
+        if (errBox) errBox.style.display = 'block';
+        showAdminToast("Upstream system warning. Check credentials.", "error");
+      } finally {
+        if (loader) loader.style.display = 'none';
+      }
+    };
+
+    // Execute Keyword Search
+    window.executeCatalogSearch = async function() {
+      const keywordInput = document.getElementById('impSearchInput');
+      const keyword = keywordInput ? keywordInput.value.trim() : '';
+      const resultsContainer = document.getElementById('searchResultsContainer');
+
+      if (!keyword) {
+        showAdminToast("Put keyword terms (e.g. 'bed', 'toy') to query catalog", "error");
+        return;
+      }
+
+      if (resultsContainer) {
+        resultsContainer.style.display = 'block';
+        resultsContainer.innerHTML = '<div class="searching">Contacting CJDropshipping search pool...</div>';
+      }
+
+      try {
+        const res = await fetch(`/api/cj/search?keyword=${encodeURIComponent(keyword)}`);
+        const data = await res.json();
+
+        if (data.success && data.products && data.products.length > 0) {
+          resultsContainer.innerHTML = '';
+          data.products.forEach(p => {
+            const card = document.createElement('div');
+            card.className = 'search-card';
+            card.innerHTML = `
+              <img src="${p.image}" alt="${p.name}" referrerpolicy="no-referrer" />
+              <div class="search-info">
+                <h4>${p.name}</h4>
+                <div class="search-price">Wholesale Cost: $${parseFloat(p.price || 0).toFixed(2)}</div>
+                <div class="search-pid">ID: ${p.pid} | Group: ${p.category}</div>
+              </div>
+              <button class="btn-import" onclick="fetchCJProductById('${p.pid}')">Select & Tune</button>
+            `;
+            resultsContainer.appendChild(card);
+          });
+        } else {
+          resultsContainer.innerHTML = '<div class="empty-msg">No products matched search criteria. Try a different request keyword.</div>';
+        }
+      } catch (err) {
+        if (resultsContainer) {
+          resultsContainer.innerHTML = `<div class="empty-msg" style="color: var(--red)">Network query fail: ${err.message}</div>`;
+        }
+      }
+    };
+
+    // Real-time Pricing Optimization math
+    window.calculateRealtimeProfit = function(targetAdjusted = false) {
+      if (!currentFetchedProduct) return;
+
+      const cost = parseFloat(currentFetchedProduct.cjPrice || 0);
+      const estShipping = 4.50; // Flat-rate standard transport multiplier
+      
+      const calcCjPriceEl = document.getElementById('calcCjPrice');
+      const calcShippingPriceEl = document.getElementById('calcShippingPrice');
+      const prodRetailPriceInput = document.getElementById('prodRetailPrice');
+      const prodMarkupInput = document.getElementById('prodMarkup');
+      const calcProfitTextEl = document.getElementById('calcProfitText');
+      const calcMarginTextEl = document.getElementById('calcMarginText');
+
+      if (calcCjPriceEl) calcCjPriceEl.innerText = `$${cost.toFixed(2)}`;
+      if (calcShippingPriceEl) calcShippingPriceEl.innerText = `$${estShipping.toFixed(2)}`;
+
+      let sellingPrice = 0;
+      let markupPercent = 0;
+
+      if (targetAdjusted) {
+        sellingPrice = parseFloat(prodRetailPriceInput.value) || 0;
+        const totalCost = cost + estShipping;
+        if (sellingPrice > 0 && totalCost > 0) {
+          markupPercent = Math.round(((sellingPrice - totalCost) / totalCost) * 100);
+          if (prodMarkupInput) prodMarkupInput.value = Math.max(0, markupPercent);
+        }
+      } else {
+        markupPercent = parseFloat(prodMarkupInput ? prodMarkupInput.value : '50') || 0;
+        sellingPrice = (cost + estShipping) * (1 + (markupPercent / 100));
+        if (prodRetailPriceInput) prodRetailPriceInput.value = sellingPrice.toFixed(2);
+      }
+
+      const netProfit = sellingPrice - (cost + estShipping);
+      const marginROI = sellingPrice > 0 ? Math.round((netProfit / sellingPrice) * 100) : 0;
+
+      if (calcProfitTextEl) {
+        if (netProfit >= 0) {
+          calcProfitTextEl.innerText = `+$${netProfit.toFixed(2)}`;
+          calcProfitTextEl.style.color = 'var(--green)';
+        } else {
+          calcProfitTextEl.innerText = `-$${Math.abs(netProfit).toFixed(2)}`;
+          calcProfitTextEl.style.color = 'var(--red)';
+        }
+      }
+
+      if (calcMarginTextEl) {
+        calcMarginTextEl.innerText = `ROI Margin: ${marginROI}% (Profit/SellPrice)`;
+      }
+    };
+
+    // Syndicate & Save to LocalStorage + Firebase Realtime Database
+    window.syndicateProduct = async function() {
+      const saveBtn = document.querySelector('.btn-save');
+      const statusBox = document.getElementById('saveStatus');
+
+      if (!currentFetchedProduct) {
+        showAdminToast("No fetched details found to syndicate", "error");
+        return;
+      }
+
+      const finalName = document.getElementById('prodName').value.trim();
+      const finalPrice = parseFloat(document.getElementById('prodRetailPrice').value) || 0;
+      const finalCategory = document.getElementById('prodCategory').value;
+      const pid = document.getElementById('prodPid').value;
+
+      if (!finalName) {
+        showAdminToast("Title cannot be blank", "error");
+        return;
+      }
+
+      if (finalPrice <= 0) {
+        showAdminToast("Verify retail selling price is > 0", "error");
+        return;
+      }
+
+      if (saveBtn) {
+        saveBtn.innerText = 'Synchronizing Datastores...';
+        saveBtn.disabled = true;
+      }
+
+      if (statusBox) {
+        statusBox.className = 'save-status';
+        statusBox.innerText = '';
+      }
+
+      const numericId = Date.now(); // Durable ID representation
+
+      const record = {
+        id: numericId,
+        cj_pid: String(pid),
+        name: finalName,
+        price: finalPrice,
+        desc: currentFetchedProduct.description || "No description supplied.",
+        img: currentFetchedProduct.image,
+        category: finalCategory,
+        rating: 4.8,
+        sold: Math.floor(Math.random() * 200) + 12
+      };
+
+      try {
+        // Part 1: Write to LocalStorage lists
+        const existingRaw = localStorage.getItem('pawdrop_imported_products');
+        const importedList = existingRaw ? JSON.parse(existingRaw) : [];
+        
+        // Exclude collisions of PID
+        const filteredList = importedList.filter(item => String(item.cj_pid) !== String(pid));
+        filteredList.push(record);
+        
+        localStorage.setItem('pawdrop_imported_products', JSON.stringify(filteredList));
+
+        // Part 1.5: Write to custom relational database backend for scalable inventory
+        try {
+          await fetch('/api/inventory/add', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              name: finalName,
+              category: finalCategory,
+              price: finalPrice,
+              desc: currentFetchedProduct.description || "No description supplied.",
+              img: currentFetchedProduct.image,
+              cj_pid: String(pid),
+              quantity: 100
+            })
+          });
+        } catch(sqlErr) {
+          console.warn("[Cloud SQL Sync Warning] Relational store write bypassed/failed:", sqlErr);
+        }
+
+        // Part 2: Write to Firebase Realtime Database for absolute durability
+        console.log(`[CJ Firebase] Syncing product specs to Realtime DB at products/${pid}`);
+        await db.ref('products/' + pid).set(record);
+
+        // Sync visual event to other pages
+        if (typeof window !== 'undefined' && window.parent) {
+          try {
+            window.parent.postMessage({
+              type: 'PAWDROP_REFRESH_INVENTORY',
+              product: record
+            }, '*');
+          } catch(e){}
+        }
+
+        if (statusBox) {
+          statusBox.className = 'save-status success';
+          statusBox.innerText = 'Syndicated successfully! Synced across PAWDROP channels.';
+        }
+        showAdminToast(`Syndicated: "${finalName}" to database!`, "success");
+
+        // Clear preview & refresh view
+        renderImportedProducts();
+        
+        setTimeout(() => {
+          const preview = document.getElementById('cjProductPreview');
+          if (preview) preview.style.display = 'none';
+          const input = document.getElementById('impPidInput');
+          if (input) input.value = '';
+          currentFetchedProduct = null;
+          if (statusBox) statusBox.innerText = '';
+        }, 1500);
+
+      } catch (err) {
+        console.error(err);
+        if (statusBox) {
+          statusBox.className = 'save-status error';
+          statusBox.innerText = `Write error: ${err.message}`;
+        }
+        showAdminToast("Failed to write coordinates to datastore channels.", "error");
+      } finally {
+        if (saveBtn) {
+          saveBtn.innerText = 'Syndicate & Sync to PAWDROP DB';
+          saveBtn.disabled = false;
+        }
+      }
+    };
+
+    // Render Sync List
+    window.renderImportedProducts = function() {
+      const grid = document.getElementById('importedGrid');
+      if (!grid) return;
+
+      const raw = localStorage.getItem('pawdrop_imported_products');
+      let productsList = raw ? JSON.parse(raw) : [];
+
+      if (productsList.length === 0) {
+        grid.innerHTML = '<div class="empty-msg">No dropshipped products synced yet. Put in a PID or search above to get started!</div>';
+        return;
+      }
+
+      grid.innerHTML = '';
+      productsList.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'imported-card';
+        card.innerHTML = `
+          <img src="${p.img}" alt="${p.name}" referrerpolicy="no-referrer" />
+          <div class="imported-info">
+            <h4>${p.name}</h4>
+            <div class="imported-prices">
+              <span class="cost">Sell: $${parseFloat(p.price).toFixed(2)}</span>
+              <span style="color: var(--neon); font-family: var(--font-mono); font-size: 10px;">ID: ${p.cj_pid}</span>
+            </div>
+            <div class="imported-profit">${p.category}</div>
+          </div>
+          <button class="btn-remove" onclick="removeImportedProduct('${p.cj_pid}')">✕</button>
+        `;
+        grid.appendChild(card);
+      });
+    };
+
+    // Remove Synced Dropship Item
+    window.removeImportedProduct = async function(pid) {
+      if(!confirm("Are you sure you want to unsync and delete this product?")) return;
+
+      try {
+        // Part 1: localStorage deletion
+        const raw = localStorage.getItem('pawdrop_imported_products');
+        if (raw) {
+          const list = JSON.parse(raw);
+          const filtered = list.filter(p => String(p.cj_pid) !== String(pid));
+          localStorage.setItem('pawdrop_imported_products', JSON.stringify(filtered));
+        }
+
+        // Part 2: Firebase deletion
+        console.log(`[CJ Firebase] Erasing: products/${pid}`);
+        await db.ref('products/' + pid).remove();
+
+        showAdminToast("Product unsynced from retail platform channels.", "success");
+        renderImportedProducts();
+
+        // Broadcast Refresh
+        if (typeof window !== 'undefined' && window.parent) {
+          try {
+            window.parent.postMessage({ type: 'PAWDROP_REFRESH_INVENTORY' }, '*');
+          } catch(e){}
+        }
+      } catch (err) {
+        showAdminToast("Persistence storage delete write error: " + err.message, "error");
+      }
+    };
+
+    // Initial load bindings
+    setTimeout(() => {
+      renderImportedProducts();
+      if (typeof initSupportChatsListener === 'function') {
+        initSupportChatsListener();
+      }
+    }, 1000);
+
+
+    // ============================================
+    // SINGLE PAGE APP CLIENT NAVIGATION SYSTEM 
+    // ============================================
+    window.navigateTo = function(pageId) {
+      const parent = document.getElementById('mainContent');
+      
+      // Fade out
+      parent.style.transition = 'opacity 0.12s ease';
+      parent.style.opacity = '0';
+      
+      setTimeout(() => {
+        // Toggle view containers
+        document.querySelectorAll('.page-view').forEach(view => {
+          view.classList.remove('active');
+        });
+        const targetView = document.getElementById(`page-${pageId}`);
+        if(targetView) targetView.classList.add('active');
+
+        // Route specifics triggers
+        if (pageId === 'orders') {
+          ordersCurrentPage = 1;
+          filterAndPaginateOrders();
+        } else if (pageId === 'products') {
+          populateProducts();
+        } else if (pageId === 'cj_importer') {
+          renderImportedProducts();
+        } else if (pageId === 'customers') {
+          populateCRM();
+        } else if (pageId === 'live_chat') {
+          if (typeof initSupportChatsListener === 'function') {
+            initSupportChatsListener();
+          }
+        } else if (pageId === 'google_chat') {
+          if (typeof initGoogleChatSyncView === 'function') {
+            initGoogleChatSyncView();
+          }
+        } else if (pageId === 'diagnostics') {
+          if (typeof initDiagnosticsView === 'function') {
+            initDiagnosticsView();
+          }
+        }
+
+        // Fade in
+        parent.style.transition = 'opacity 0.25s ease';
+        parent.style.opacity = '1';
+      }, 125);
+
+      // Update sidebar visual tags
+      document.querySelectorAll('.sidebar-item').forEach(item => {
+        item.classList.remove('active');
+        if(item.dataset.page === pageId) item.classList.add('active');
+      });
+
+      // Close mobile drawer after select
+      document.getElementById('sidebar').classList.remove('mobile-open');
+    };
+
+    // Navbar Hamburger toggles
+    document.getElementById('menuToggleBtn').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.toggle('mobile-open');
+    });
+
+    // Sidebar items listen handlers
+    document.querySelectorAll('.sidebar-item').forEach(item => {
+      item.addEventListener('click', () => {
+        navigateTo(item.dataset.page);
+      });
+    });
+
+    // Orders page lookup controls
+    document.getElementById('orderSearchQuery').addEventListener('input', () => {
+      ordersCurrentPage = 1;
+      filterAndPaginateOrders();
+    });
+    document.getElementById('orderStatusSelector').addEventListener('change', () => {
+      ordersCurrentPage = 1;
+      filterAndPaginateOrders();
+    });
+    document.getElementById('orderStartDate').addEventListener('change', () => {
+      ordersCurrentPage = 1;
+      filterAndPaginateOrders();
+    });
+    document.getElementById('orderEndDate').addEventListener('change', () => {
+      ordersCurrentPage = 1;
+      filterAndPaginateOrders();
+    });
+
+    document.getElementById('exportCsvBtn').addEventListener('click', exportOrdersToCSV);
+
+    // Manual Product Upload Event Handlers
+    const manualProdImageFile = document.getElementById('manualProdImageFile');
+    const imageUploadStatus = document.getElementById('imageUploadStatus');
+    const manualProductForm = document.getElementById('manualProductForm');
+    const btnSubmitManualProd = document.getElementById('btnSubmitManualProd');
+
+    if (manualProdImageFile) {
+      manualProdImageFile.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          imageUploadStatus.innerText = `Selected: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+          imageUploadStatus.style.color = "var(--neon)";
+        } else {
+          imageUploadStatus.innerText = "No file selected";
+          imageUploadStatus.style.color = "var(--gray)";
+        }
+      });
+    }
+
+    if (manualProductForm) {
+      manualProductForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const title = document.getElementById('manualProdTitle').value.trim();
+        const desc = document.getElementById('manualProdDesc').value.trim();
+        const price = parseFloat(document.getElementById('manualProdPrice').value);
+        const stock = parseInt(document.getElementById('manualProdStock').value);
+        const category = document.getElementById('manualProdCategory').value;
+        const inputUrl = document.getElementById('manualProdImageUrl').value.trim();
+        const file = manualProdImageFile.files[0];
+
+        if (!title || !desc || isNaN(price) || isNaN(stock)) {
+          showAdminToast("Please fill out all required fields.", "error");
+          return;
+        }
+
+        btnSubmitManualProd.disabled = true;
+        btnSubmitManualProd.innerText = "⚡ UPLOADING IMAGE & CREATING PRODUCT...";
+
+        try {
+          let imageUrl = inputUrl || "https://picsum.photos/600/400?random=11";
+          
+          if (file) {
+            imageUrl = await uploadProductImage(file);
+          }
+
+          const productData = {
+            id: Date.now(),
+            name: title,
+            desc: desc,
+            price: price,
+            stock: stock,
+            category: category,
+            img: imageUrl,
+            sold: 0,
+            rating: 4.5 + Math.random() * 0.5
+          };
+
+          await addProductToFirestore(productData);
+          showAdminToast("Product successfully saved to Firestore!", "success");
+          
+          // Reset Form and file indicator
+          manualProductForm.reset();
+          imageUploadStatus.innerText = "No file selected";
+          imageUploadStatus.style.color = "var(--gray)";
+          
+        } catch (err) {
+          console.error("Manual product upload failed:", err);
+          showAdminToast("Failed to upload product: " + err.message, "error");
+        } finally {
+          btnSubmitManualProd.disabled = false;
+          btnSubmitManualProd.innerText = "➕ SUBMIT PRODUCT TO FIRESTORE";
+        }
+      });
+    }
+
+    // Sync all processing orders dispatch
+    document.getElementById('syncAllBtn').addEventListener('click', async () => {
+      const btn = document.getElementById('syncAllBtn');
+      btn.innerText = "SYNCING...";
+      try {
+        db.ref("orders").orderByChild("status").equalTo("processing").once("value", async snap => {
+          const updates = [];
+          snap.forEach(child => {
+            updates.push(orderManager.syncTracking(child.key));
+          });
+          await Promise.all(updates);
+          window.showAdminToast(`Batch synchronized ${updates.length} processing orders!`, "success");
+        });
+      } catch(e) {
+        showAdminToast("Connection issues during batch updating.", "error");
+      } finally {
+        btn.innerText = "⚡ SYNC ALL";
+      }
+    });
+
+    // Close overlays with Escape key
+    document.addEventListener('keydown', (e) => {
+      if(e.key === 'Escape') {
+        closeOrderDrawer();
+      }
+    });
+
+    // Sync theme icon instantly on load
+    (function() {
+      const themeToggleBtn = document.getElementById('themeToggleBtn');
+      if (!themeToggleBtn) return;
+      const activeTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+      if (activeTheme === 'light') {
+        themeToggleBtn.innerHTML = `
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px;">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+        `;
+      }
+    })();
+
+
+    // ==========================================
+    // GOOGLE CHAT REALTIME SYNC HANDLERS
+    // ==========================================
+    let googleChatAuthToken = localStorage.getItem('pawdrop_gchat_token') || '';
+    let googleChatEmail = localStorage.getItem('pawdrop_gchat_email') || '';
+
+    window.initGoogleChatSyncView = async function() {
+      const disc = document.getElementById('gchat_disconnected_view');
+      const conn = document.getElementById('gchat_connected_view');
+      
+      try {
+        const snap = await db.ref('settings/google_chat_sync').once('value');
+        const config = snap.val() || {};
+        
+        if (config.accessToken) {
+          googleChatAuthToken = config.accessToken;
+          localStorage.setItem('pawdrop_gchat_token', googleChatAuthToken);
+        }
+        if (config.email) {
+          googleChatEmail = config.email;
+          localStorage.setItem('pawdrop_gchat_email', googleChatEmail);
+        }
+        if (config.webhookUrl) {
+          const whEl = document.getElementById('gchat_webhook_url');
+          if (whEl) whEl.value = config.webhookUrl;
+        }
+
+        const isConnected = !!googleChatAuthToken;
+        if (isConnected) {
+          if (disc) disc.style.display = 'none';
+          if (conn) conn.style.display = 'flex';
+          
+          const emailEl = document.getElementById('gchat_user_email');
+          if (emailEl) emailEl.innerText = googleChatEmail || 'Connected Workspace Account';
+
+          const toggleEl = document.getElementById('gchat_sync_toggle');
+          if (toggleEl) toggleEl.checked = !!config.enabled;
+
+          await fetchGoogleChatSpacesList(config.spaceId);
+        } else {
+          if (disc) disc.style.display = 'flex';
+          if (conn) conn.style.display = 'none';
+        }
+      } catch (err) {
+        console.error("Load Google Chat settings error:", err);
+      }
+    };
+
+    window.authGoogleChat = function() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      provider.addScope('https://www.googleapis.com/auth/chat.spaces');
+      provider.addScope('https://www.googleapis.com/auth/chat.spaces.readonly');
+      provider.addScope('https://www.googleapis.com/auth/chat.spaces.create');
+      provider.addScope('https://www.googleapis.com/auth/chat.messages');
+      provider.addScope('https://www.googleapis.com/auth/chat.messages.create');
+      provider.addScope('https://www.googleapis.com/auth/chat.memberships');
+      provider.addScope('https://www.googleapis.com/auth/chat.delete');
+
+      firebase.auth().signInWithPopup(provider)
+        .then(async (result) => {
+          const token = result.credential.accessToken;
+          const user = result.user;
+          
+          googleChatAuthToken = token;
+          googleChatEmail = user.email || 'Workspace User';
+          
+          localStorage.setItem('pawdrop_gchat_token', token);
+          localStorage.setItem('pawdrop_gchat_email', googleChatEmail);
+
+          await db.ref('settings/google_chat_sync').update({
+            accessToken: token,
+            email: googleChatEmail
+          });
+
+          await initGoogleChatSyncView();
+          window.showAdminToast("Successfully connected to Google Chat API!", "success");
+        })
+        .catch((error) => {
+          console.error("Google Workspace Login Error:", error);
+          window.showAdminToast("Google Workspace popup auth failed: " + error.message, "error");
+        });
+    };
+
+    window.disconnectGoogleChat = async function() {
+      googleChatAuthToken = '';
+      googleChatEmail = '';
+      localStorage.removeItem('pawdrop_gchat_token');
+      localStorage.removeItem('pawdrop_gchat_email');
+
+      try {
+        await db.ref('settings/google_chat_sync').remove();
+        await initGoogleChatSyncView();
+        window.showAdminToast("Google Chat connection disconnected.", "info");
+      } catch (err) {
+        console.error("Disconnect Google Chat Write error:", err);
+      }
+    };
+
+    window.fetchGoogleChatSpacesList = async function(preselectSpaceId = null) {
+      const select = document.getElementById('gchat_spaces_dropdown');
+      if (!select) return;
+      
+      select.innerHTML = '<option value="">Querying active spaces...</option>';
+
+      try {
+        const response = await fetch('/api/google-chat/spaces', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ accessToken: googleChatAuthToken })
+        });
+        
+        if (!response.ok) {
+          throw new Error(await response.text());
+        }
+
+        const data = await response.json();
+        const spaces = data.spaces || [];
+
+        if (spaces.length === 0) {
+          select.innerHTML = '<option value="">No Google Chat spaces found</option>';
+          return;
+        }
+
+        select.innerHTML = '';
+        spaces.forEach(space => {
+          const opt = document.createElement('option');
+          opt.value = space.name;
+          opt.innerText = space.displayName || space.name;
+          if (preselectSpaceId && space.name === preselectSpaceId) {
+            opt.selected = true;
+          }
+          select.appendChild(opt);
+        });
+      } catch (err) {
+        console.error("Listing Google Chat Spaces failed:", err);
+        select.innerHTML = '<option value="">Failed fetching Google Chat: Check credentials</option>';
+      }
+    };
+
+    window.createDedicatedGoogleChatSpace = async function() {
+      const spaceName = prompt("Enter a name for your dedicated support space:", "PAWDROP Customer Support Desk");
+      if (!spaceName) return;
+
+      try {
+        window.showAdminToast("Provisioning new Google Chat Space...", "info");
+        const response = await fetch('/api/google-chat/create-space', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            accessToken: googleChatAuthToken,
+            displayName: spaceName
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(await response.text());
+        }
+
+        const newSpace = await response.json();
+        window.showAdminToast(`Successfully created dedicated space: ${newSpace.displayName}!`, "success");
+        await fetchGoogleChatSpacesList(newSpace.name);
+        await saveGoogleChatSyncSettings();
+      } catch (err) {
+        console.error("Space provisioning failed:", err);
+        window.showAdminToast("Space setup failed: " + err.message, "error");
+      }
+    };
+
+    window.saveGoogleChatSyncSettings = async function() {
+      const select = document.getElementById('gchat_spaces_dropdown');
+      const toggle = document.getElementById('gchat_sync_toggle');
+      if (!select || !toggle) return;
+
+      const spaceId = select.value;
+      const enabled = toggle.checked;
+
+      try {
+        await db.ref('settings/google_chat_sync').update({
+          spaceId: spaceId,
+          enabled: enabled,
+          lastUpdated: new Date().toISOString()
+        });
+        window.showAdminToast("Google Chat configuration updated successfully!", "success");
+      } catch (err) {
+        console.error("Save config error:", err);
+        window.showAdminToast("Updating settings failed: " + err.message, "error");
+      }
+    };
+
+    window.saveGoogleChatWebhook = async function() {
+      const whInput = document.getElementById('gchat_webhook_url');
+      if (!whInput) return;
+      const url = whInput.value.trim();
+
+      try {
+        await db.ref('settings/google_chat_sync').update({
+          webhookUrl: url,
+          lastUpdated: new Date().toISOString()
+        });
+        window.showAdminToast("Alternate Webhook settings saved!", "success");
+      } catch (err) {
+        console.error("Save webhook config error:", err);
+        window.showAdminToast("Failed to save Webhook configuration: " + err.message, "error");
+      }
+    };
+
+    window.sendGoogleChatTestPing = async function() {
+      const select = document.getElementById('gchat_spaces_dropdown');
+      const statusEl = document.getElementById('gchat_test_status');
+      const whInput = document.getElementById('gchat_webhook_url');
+      const webhookUrl = whInput ? whInput.value.trim() : '';
+
+      if (!webhookUrl && (!select || !select.value)) {
+        window.showAdminToast("Please select a linked Google Chat Space or enter a Webhook URL first.", "warning");
+        return;
+      }
+      if (statusEl) statusEl.innerText = "Transmitting ping message...";
+
+      try {
+        const text = "🐾 *PAWDROP Live Support Channel Configured Successfully!* \nThis is a real-time integration confirmation ping.";
+        
+        if (webhookUrl) {
+          const response = await fetch(webhookUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text })
+          });
+          if (!response.ok) throw new Error(await response.text());
+        } else {
+          const response = await fetch('/api/google-chat/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              accessToken: googleChatAuthToken,
+              spaceId: select.value,
+              text: text
+            })
+          });
+          if (!response.ok) throw new Error(await response.text());
+        }
+
+        if (statusEl) statusEl.innerText = "✅ Test message posted successfully!";
+        window.showAdminToast("Verification ping delivered to Google Chat!", "success");
+      } catch (err) {
+        console.error("Test send failed:", err);
+        if (statusEl) statusEl.innerText = "❌ Transmit failed: check space access.";
+        window.showAdminToast("Connection check failed: " + err.message, "error");
+      }
+    };
+
+    // Google Chat automatic support syncer (Supports both OAuth Standard & Webhook alternative)
+    window.initGoogleChatSyncListener = function() {
+      if (!db) return;
+      db.ref('settings/google_chat_sync').on('value', (snapConfig) => {
+        const config = snapConfig.val();
+        if (!config || !config.enabled || (!config.webhookUrl && (!config.spaceId || !config.accessToken))) {
+          return;
+        }
+
+        // Connect real-time ticket forwarder
+        db.ref('support_chats').on('child_added', (snapUser) => {
+          const userId = snapUser.key;
+          db.ref(`support_chats/${userId}/messages`).on('child_added', async (snapMsg) => {
+            const msgKey = snapMsg.key;
+            const msg = snapMsg.val();
+            // Skip empty or already synced
+            if (!msg || msg.gchat_synced) return;
+
+            // Instantly update gchat_synced key to act as atomic lock
+            db.ref(`support_chats/${userId}/messages/${msgKey}`).update({
+              gchat_synced: true
+            }).catch(()=>{});
+
+            // Prepare styled message text 
+            const senderType = msg.sender || 'user';
+            const senderName = senderType === 'admin' ? '👤 Support Representative' : (senderType === 'bot' ? '🐾 PAWDROP AI Agent' : '👤 Customer');
+            const timeStr = msg.time ? new Date(msg.time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
+            
+            const markdownText = `🐾 *Support update on ticket [${userId}]:* \n*${senderName}* (${timeStr})\n> ${msg.text}`;
+
+            try {
+              if (config.webhookUrl) {
+                await fetch(config.webhookUrl, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ text: markdownText })
+                });
+              } else {
+                await fetch('/api/google-chat/send', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    accessToken: config.accessToken,
+                    spaceId: config.spaceId,
+                    text: markdownText
+                  })
+                });
+              }
+            } catch(e) {
+              console.warn("Failed posting support updates to Google Chat Space:", e);
+            }
+          });
+        });
+      });
+    };
+
+    // Auto-run syncer if already enabled
+    setTimeout(() => {
+      if (typeof initGoogleChatSyncListener === 'function') {
+        initGoogleChatSyncListener();
+      }
+    }, 1500);
+
+  </script>
+</body>
+</html>

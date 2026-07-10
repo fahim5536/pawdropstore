@@ -1,0 +1,114 @@
+:root {
+  color-scheme: light;
+
+  /* Primary Theme Variables (Descriptive) */
+  --body-bg:         #ffffff;
+  --text-primary:    #111112;
+  --text-secondary:  #4a4a4c;
+  --accent-color:    #4c6100; /* Rich, accessible yellow-green/lime - contrast is 4.74:1 on white (WCAG AA Compliant) */
+  --accent-rgb:      76, 97, 0;
+
+  /* Existing Variable Mappings (so existing layouts don't break) */
+  --black:     var(--body-bg);
+  --black-2:   #f4f4f5;
+  --black-3:   #e4e4e7;
+  --black-4:   #d4d4d8;
+  --neon:      var(--accent-color);
+  --neon-rgb:  var(--accent-rgb);
+  --neon-dim:  rgba(var(--neon-rgb), 0.15);
+  --neon-glow: rgba(var(--neon-rgb), 0.4);
+  --white:     var(--text-primary);
+  --gray:      var(--text-secondary);
+  --gray-2:    #666666;
+  --error:     #d90000;
+  --info:      #007a99;
+  --success:   #008040;
+  --warning:   #b35900;
+  --border:    rgba(0, 0, 0, 0.12);
+  --bg-alpha:  rgba(255, 255, 255, 0.95);
+  --modal-bg:  rgba(0, 0, 0, 0.6);
+
+  /* Typography */
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-body:    'Inter', sans-serif;
+
+  /* Font sizes */
+  --fs-hero:    clamp(72px, 11vw, 160px);
+  --fs-h1:      clamp(48px, 7vw, 100px);
+  --fs-h2:      clamp(36px, 5vw, 72px);
+  --fs-h3:      24px;
+  --fs-body:    16px;
+  --fs-small:   13px;
+  --fs-label:   11px;
+  --lh-tight:   0.9;
+  --ls-wide:    0.15em;
+
+  /* Spacing */
+  --section-pad: clamp(80px, 10vw, 140px);
+  --container:   min(1400px, 92vw);
+
+  /* Transitions */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.87, 0, 0.13, 1);
+  --duration: 0.65s;
+}
+
+/* Explicit selector for data-theme="light" just in case we need to explicitly match it */
+[data-theme="light"] {
+  color-scheme: light;
+  --body-bg:         #ffffff;
+  --text-primary:    #111112;
+  --text-secondary:  #4a4a4c;
+  --accent-color:    #4c6100;
+  --accent-rgb:      76, 97, 0;
+
+  --black:     var(--body-bg);
+  --black-2:   #f4f4f5;
+  --black-3:   #e4e4e7;
+  --black-4:   #d4d4d8;
+  --neon:      var(--accent-color);
+  --neon-rgb:  var(--accent-rgb);
+  --neon-dim:  rgba(var(--neon-rgb), 0.15);
+  --neon-glow: rgba(var(--neon-rgb), 0.4);
+  --white:     var(--text-primary);
+  --gray:      var(--text-secondary);
+  --gray-2:    #666666;
+  --error:     #d90000;
+  --info:      #007a99;
+  --success:   #008040;
+  --warning:   #b35900;
+  --border:    rgba(0, 0, 0, 0.12);
+  --bg-alpha:  rgba(255, 255, 255, 0.95);
+  --modal-bg:  rgba(0, 0, 0, 0.6);
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* Primary Theme Variables (Descriptive) */
+  --body-bg:         #111112;
+  --text-primary:    #ffffff;
+  --text-secondary:  #888888;
+  --accent-color:    #D2FF00; /* High-contrast neon yellow/green - contrast is 14.8:1 on dark #111112 (WCAG AA Compliant) */
+  --accent-rgb:      210, 255, 0;
+
+  /* Existing Variable Mappings (so existing layouts don't break) */
+  --black:     var(--body-bg);
+  --black-2:   #18181a;
+  --black-3:   #222224;
+  --black-4:   #2a2a2c;
+  --neon:      var(--accent-color);
+  --neon-rgb:  var(--accent-rgb);
+  --neon-dim:  rgba(var(--neon-rgb), 0.15);
+  --neon-glow: rgba(var(--neon-rgb), 0.4);
+  --white:     var(--text-primary);
+  --gray:      var(--text-secondary);
+  --gray-2:    #444446;
+  --error:     #ff4444;
+  --info:      #00D4FF;
+  --success:   #00FF88;
+  --warning:   #FF8800;
+  --border:    rgba(255, 255, 255, 0.08);
+  --bg-alpha:  rgba(17, 17, 18, 0.8);
+  --modal-bg:  rgba(0, 0, 0, 0.75);
+}

@@ -1,0 +1,36 @@
+{
+  "rules": {
+    "products": {
+      ".read": "true",
+      ".write": "auth != null"
+    },
+    "deleted_products": {
+      ".read": "true",
+      ".write": "auth != null"
+    },
+    "orders": {
+      ".read": "true",
+      ".write": "true"
+    },
+    "stats": {
+      ".read": "true",
+      ".write": "true"
+    },
+    "support_chats": {
+      ".read": "true",
+      ".write": "true"
+    },
+    "settings": {
+      ".read": "true",
+      ".write": "auth != null"
+    },
+    "notifications": {
+      ".read": "true",
+      ".write": "true"
+    },
+    "system_diagnostic_pings": {
+      ".read": "true",
+      ".write": "true"
+    }
+  }
+}

@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy | PAWDROP</title>
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Read PAWDROP's Privacy Policy. Learn about how we secure your data, respects your choices, and offers peak privacy standards.">
+  <meta name="keywords" content="privacy policy, data collection, pet store security, secure checkout">
+  <meta name="robots" content="index, follow">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="PAWDROP | Privacy Policy">
+  <meta property="og:description" content="Read how we safeguard and protect your personal and pet information.">
+  <meta property="og:image" content="https://picsum.photos/1200/630?random=og">
+
+  <!-- Google Fonts: Space Grotesk + Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script type="module" src="/src/js/main.js"></script>
+  <style>
+    body { background: var(--black, #111112); margin: 0; }
+    body.is-loading > *:not(.preloader) { opacity: 0; visibility: hidden; pointer-events: none; }
+    .preloader { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #0a0a0a; z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 40px; }
+    .preloader__logo { font-family: sans-serif; font-size: 48px; font-weight: 700; letter-spacing: 0.15em; color: var(--white, #fff); }
+    .preloader__logo .neon { color: var(--neon, #D2FF00); }
+    
+    .privacy-container h3 {
+      font-family: var(--font-display);
+      font-size: 22px;
+      color: var(--white);
+      margin-top: 40px;
+      margin-bottom: 16px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+    .privacy-container p {
+      color: var(--gray);
+      font-size: 16px;
+      line-height: 1.8;
+      margin-bottom: 20px;
+    }
+    .privacy-container ul {
+      margin-left: 20px;
+      margin-bottom: 24px;
+      list-style-type: square;
+    }
+    .privacy-container li {
+      color: var(--gray);
+      font-size: 15px;
+      line-height: 1.7;
+      margin-bottom: 10px;
+    }
+    .privacy-container strong {
+      color: var(--white);
+    }
+  </style>
+  <script>try{document.documentElement.setAttribute('data-theme', localStorage.getItem('pawdrop_theme') || 'dark');}catch(e){document.documentElement.setAttribute('data-theme', 'dark');}</script>
+</head>
+
+<body class="is-loading">
+
+  <!-- PRELOADER -->
+  <div class="preloader" id="preloader">
+    <div class="preloader__logo">PAW<span class="neon">DROP</span></div>
+    <div class="preloader__line">
+      <div class="preloader__bar"></div>
+    </div>
+    <div class="preloader__count">0%</div>
+  </div>
+
+  <!-- NAVBAR -->
+  <nav class="nav" id="nav">
+    <div class="nav__inner container mx-auto px-4 md:px-8">
+      <div class="nav__brand-wrapper">
+        <a href="#" id="backBtn" class="nav__back-btn" aria-label="Go Back" style="display: none;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 24px; height: 24px;">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+        </a>
+        <a class="nav__logo" href="index.html" style="padding-left: 0 !important;">
+          PAW<span class="neon">DROP</span>
+        </a>
+      </div>
+      
+      
+      
+      <ul class="nav__links">
+        <li><a href="index.html">HOME</a></li>
+        <li><a href="shop.html">SHOP</a></li>
+        <li><a href="orders.html">TRACK ORDER</a></li>
+        <li><a href="about.html">ABOUT</a></li>
+        <li><a href="contact.html">CONTACT</a></li>
+      </ul>
+
+
+
+      <div class="nav__actions">
+
+        <select class="currency-switcher neon">
+          <option value="USD" style="background: var(--black); color: var(--neon);">USD ($)</option>
+          <option value="EUR" style="background: #111; color: var(--neon);">EUR (€)</option>
+          <option value="GBP" style="background: #111; color: var(--neon);">GBP (£)</option>
+        </select>
+
+        <button class="nav__user" id="themeToggleBtn" aria-label="Toggle Theme" style="background: none; border: none; color: var(--white); cursor: pointer; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; transition: color 0.3s ease;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px;">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+
+        
+        <div class="nav__search">
+          <input type="text" id="navSearchInput" placeholder="Search..." aria-label="Search products">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+        </div>
+        
+        <button class="nav__user" id="authBtn" aria-label="Sign In" style="background: none; border: none; color: var(--white); cursor: pointer; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; transition: color 0.3s ease;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px;">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </button>
+
+        <a href="/profile.html" class="nav__user" id="profileBtn" aria-label="Profile" style="background: none; border: none; color: var(--white); cursor: pointer; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; transition: color 0.3s ease; text-decoration: none; display: none;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px;">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </a>
+
+        
+        
+        <a href="/wishlist.html" class="nav__user" id="wishlistBtn" aria-label="Wishlist" style="background: none; border: none; color: var(--white); cursor: pointer; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; transition: color 0.3s ease; position: relative; text-decoration: none;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px;" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+          </svg>
+          <span class="nav__cart-count" id="wishlistCount" style="right: 2px;">0</span>
+        </a>
+        <button class="nav__cart" id="cartBtn" aria-label="Shopping Cart">
+          <!-- Shopping Bag Icon SVG -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4H6z"></path>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <path d="M16 10a4 4 0 0 1-8 0"></path>
+          </svg>
+          <span class="nav__cart-count" id="cartCount">0</span>
+        </button>
+        <button class="nav__burger" id="burger" aria-label="Toggle Menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- MOBILE HORIZONTAL NAV BAR -->
+    <div class="nav__mobile-bar">
+      <a href="index.html">HOME</a>
+      <a href="shop.html">SHOP</a>
+      <a href="orders.html">TRACK ORDER</a>
+      <a href="about.html">ABOUT</a>
+      <a href="contact.html">CONTACT</a>
+    </div>
+  </nav>
+
+  <!-- MOBILE MENU -->
+  <!-- MOBILE MENU START -->
+  <div class="mobile-menu" id="mobileMenu">
+    <div class="mobile-menu__header">
+      <div class="mobile-menu__title">PAW<span style="color: var(--neon);">DROP</span></div>
+      <button class="mobile-menu__close" id="mobileMenuCloseBtn" aria-label="Close Menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <ul class="mobile-menu__items">
+      <li>
+        <a href="profile.html" class="mobile-menu__link">
+          <div class="mobile-menu__icon-container">
+            <svg class="mobile-menu__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+          </div>
+          <span>PROFILE</span>
+        </a>
+      </li>
+      <li>
+        <div class="mobile-menu__link mobile-menu__search-link">
+          <div class="mobile-menu__icon-container">
+            <svg class="mobile-menu__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </div>
+          <input type="text" id="mobileSearchInput" placeholder="SEARCH" />
+          <button id="mobileSearchBtn" aria-label="Search" class="mobile-menu__search-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
+        </div>
+      </li>
+      <li>
+        <a href="wishlist.html" class="mobile-menu__link">
+          <div class="mobile-menu__icon-container">
+            <svg class="mobile-menu__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+            </svg>
+          </div>
+          <span>MY WISHLIST</span>
+          <span class="mobile-menu__badge" id="wishlistCount">0</span>
+        </a>
+      </li>
+      <li class="mobile-menu__separator"></li>
+      <li class="mobile-menu__section-title">SETTINGS & INFO</li>
+      <li class="mobile-menu__setting-item">
+        <span class="setting-label">Currency</span>
+        <select class="currency-switcher neon mobile-currency-switcher" style="padding: 4px 10px; font-size: 12px; font-weight: 600; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1); color: var(--neon); border-radius: 6px; cursor: pointer; height: 32px; font-family: var(--font-sans);">
+          <option value="USD">USD ($)</option>
+          <option value="EUR">EUR (€)</option>
+          <option value="GBP">GBP (£)</option>
+        </select>
+      </li>
+      <li class="mobile-menu__setting-item">
+        <span class="setting-label">Theme</span>
+        <button class="outline-btn" id="mobileThemeToggleBtn" style="padding: 4px 10px; font-size: 11px; font-weight: 700; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1); color: var(--white); border-radius: 6px; cursor: pointer; height: 32px; text-transform: uppercase; letter-spacing: 0.03em; font-family: var(--font-sans);">
+          TOGGLE THEME
+        </button>
+      </li>
+      <li>
+        <a href="faq.html" class="mobile-menu__link">
+          <div class="mobile-menu__icon-container">
+            <svg class="mobile-menu__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+          </div>
+          <span>FAQ & HELP CENTER</span>
+        </a>
+      </li>
+      <li>
+        <a href="about.html" class="mobile-menu__link">
+          <div class="mobile-menu__icon-container">
+            <svg class="mobile-menu__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="16" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+          </div>
+          <span>ABOUT OUR STORE</span>
+        </a>
+      </li>
+      <li>
+        <a href="contact.html" class="mobile-menu__link">
+          <div class="mobile-menu__icon-container">
+            <svg class="mobile-menu__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+              <polyline points="22,6 12,13 2,6"></polyline>
+            </svg>
+          </div>
+          <span>CONTACT SUPPORT</span>
+        </a>
+      </li>
+    </ul>
+  </div>
+  <!-- MOBILE MENU END --><!-- PRIVACY POLICY CONTENT -->
+  <section class="privacy" style="padding-top: 150px; padding-bottom: 100px; max-width: 900px; margin: 0 auto; padding-left: 24px; padding-right: 24px;">
+    <div style="margin-bottom: 40px; text-align: center;">
+      <span class="section-label" id="legalLabel" style="color: var(--neon); font-size: 14px; text-transform: uppercase; letter-spacing: 0.15em; font-family: var(--font-mono);">Our Commitment</span>
+      <h2 class="section-title" id="legalTitle" style="font-size: 3.5rem; font-weight: 700; margin-top: 10px; margin-bottom: 20px; font-family: var(--font-display); text-transform: uppercase;">PRIVACY POLICY</h2>
+      <p style="color: var(--gray); font-size: 16px; margin: 0 auto; max-width: 600px;">Official regulatory terms governing the PAWDROP global e-commerce dropshipping system. Select a category below to review terms.</p>
+    </div>
+
+    <!-- LEGAL PORTAL TABS -->
+    <div class="legal-tabs" style="display: flex; justify-content: center; gap: 12px; margin-bottom: 40px; flex-wrap: wrap;">
+      <button class="tab-btn" onclick="switchLegalTab('privacy')" id="tab-privacy" style="background: var(--neon); border: 1px solid var(--neon); color: var(--black); font-family: var(--font-display); font-size: 13px; font-weight: 700; padding: 12px 24px; border-radius: 6px; cursor: pointer; transition: all 0.25s ease; text-transform: uppercase; letter-spacing: 0.05em;">Privacy Policy</button>
+      <button class="tab-btn" onclick="switchLegalTab('terms')" id="tab-terms" style="background: var(--black-2); border: 1px solid var(--border); color: var(--gray); font-family: var(--font-display); font-size: 13px; font-weight: 600; padding: 12px 24px; border-radius: 6px; cursor: pointer; transition: all 0.25s ease; text-transform: uppercase; letter-spacing: 0.05em;">Terms of Service</button>
+      <button class="tab-btn" onclick="switchLegalTab('returns')" id="tab-returns" style="background: var(--black-2); border: 1px solid var(--border); color: var(--gray); font-family: var(--font-display); font-size: 13px; font-weight: 600; padding: 12px 24px; border-radius: 6px; cursor: pointer; transition: all 0.25s ease; text-transform: uppercase; letter-spacing: 0.05em;">Returns & Refunds</button>
+    </div>
+
+    <!-- POLICY CONTAINER -->
+    <div class="privacy-container" style="background: rgba(255, 255, 255, 0.01); border: 1px solid var(--border); padding: 40px; border-radius: 12px; min-height: 400px; box-shadow: 0 4px 30px rgba(0,0,0,0.15);">
+      
+      <!-- TAB 1: PRIVACY POLICY -->
+      <div id="legal-privacy-content" style="display: block;">
+        <span style="color: var(--gray); font-size: 12px; font-family: var(--font-mono); text-transform: uppercase; display: block; margin-bottom: 15px;">Last Revised: June 18, 2026 | Document ID: PD-PP-2026-V2</span>
+        <p>At PAWDROP, the integrity, confidentiality, and security of our global pet owner community’s personal and relational data are our foremost priorities. This Privacy Policy documents our rigorous procedures regarding the acquisition, protection, and systematic deployment of your information across our web applications, checkout models, and automated customer assistance frameworks (such as PAWDROP AI Companion).</p>
+
+        <h3>1. DATA ACQUISITION & INTENT</h3>
+        <p>To process dropshipped orders, perform real-time checkouts, and deliver contextual veterinary diagnostic help, PAWDROP records specific parameters provided by you:</p>
+        <ul>
+          <li><strong>Identity Identifiers:</strong> Your full name, delivery destination, postal code, billing address, telephone numbers, and email accounts.</li>
+          <li><strong>Profile Parameters:</strong> Registered pet names, breeds, birth metrics, symptom records, dietary configurations, and product favorites managed via our interface nodes.</li>
+          <li><strong>Operational Telemetry:</strong> IP coordinates, browser system characteristics, local time records, session flows, and shopping interaction timings.</li>
+        </ul>
+
+        <h3>2. COHERENT COOKIE & STORAGE MECHANICS</h3>
+        <p>PAWDROP deploys standard tracking coordinates, LocalStorage variables, and secure session state cookies to optimize e-commerce delivery flows. This includes:</p>
+        <ul>
+          <li><strong>Persistence Cookies:</strong> Retaining security tokens, items active inside your Shopping Cart, item additions in your Wishlist, and customized site interface settings (such as persistent color theme selections or localized currency settings).</li>
+          <li><strong>Performance Metrics:</strong> Standard analytical identifiers mapping transaction pipelines to prevent broken pages, visual interface flashes, or repeated authorization prompts.</li>
+        </ul>
+
+        <h3>3. SECURITY SAFEGUARDS & GATEWAYS</h3>
+        <p>We deploy high-level protection protocols to guard customer profiles:</p>
+        <ul>
+          <li>All transaction gateways process checkout records using 256-bit Secure Sockets Layer (SSL) encryption protocols. Direct credit/debit card numbers are parsed instantly by authenticated standard processing clearinghouses and are never cached or housed on our servers.</li>
+          <li>Database queries interact with Cloud Firestore configured with strong write/read permissions, ensuring that arbitrary queries cannot extract private owner profiles.</li>
+        </ul>
+
+        <h3>4. RESTRICTED LOGISTICS TRANSFERS</h3>
+        <p>To safely execute the dropshipping cycle, PAWDROP shares specific address fields and product identifiers exclusively with our verified direct production hubs, logistics clearinghouses, and supply networks (such as CJ Dropshipping integration routines). We strictly forbid these logistics agents from retaining your address for non-delivery or advertising endeavors. We never rent or barter your metadata to external marketing brokers.</p>
+
+        <h3>5. YOUR CONSUMER RIGHTS & CHOICES</h3>
+        <p>Under international guidelines, you maintain absolute control over your digital trace. You can issue requests to support@pawdrop.com for full visual access to your saved profile details, request immediate data rectification, or require the permanent deletion of your profile history from our active records.</p>
+      </div>
+
+      <!-- TAB 2: TERMS OF SERVICE -->
+      <div id="legal-terms-content" style="display: none;">
+        <span style="color: var(--gray); font-size: 12px; font-family: var(--font-mono); text-transform: uppercase; display: block; margin-bottom: 15px;">Last Revised: June 18, 2026 | Document ID: PD-TS-2026-V1</span>
+        <p>Welcome to PAWDROP. By navigating this storefront, creating a member account, utilizing our diagnostic utility tools, or completing checkout transactions, you enter into a legally binding agreement to comply with and be bound by the following Terms of Service. Please review these rules thoroughly.</p>
+
+        <h3>1. USER ACCOUNT INTEGRITY</h3>
+        <p>When establishing an account, shopping, or entering delivery data within PAWDROP, you represent and warrant that all information you supply is complete, accurate, and current. You assume total responsibility for maintaining the confidentiality of your credentials, and for all interactions occurring under your profile.</p>
+
+        <h3>2. ACCURACY OF DELIVERY DETAILS</h3>
+        <p>Because PAWDROP executes direct-fulfillment/dropshipped logistic transfers from global manufacturer centers, <strong>the purchaser bears absolute obligation for entering flawless delivery coordinates</strong>. PAWDROP shall not be held liable, and will not issue currency refunds, for parcels that fail to deliver, are returned to sender, or are lost due to typos, inaccurate door numbers, or incorrect zip codes provided by the customer at checkout.</p>
+
+        <h3>3. DROPSHIPPED ORDERING & SPEED LIMITATIONS</h3>
+        <p>Our catalog features curated pet accessories synchronized with international dropshipping networks. Upon checking out:</p>
+        <ul>
+          <li><strong>Fulfillment Timelines:</strong> Supplier handoff, product inspections, and initial parcel tracking generation usually take 1 to 3 business days.</li>
+          <li><strong>Transit Timelines:</strong> Global shipping schedules can range from 7 to 20 business days depending on localized carrier speeds and international customs clearing. All delivery durations displayed are approximations.</li>
+          <li>PAWDROP remains exempt from financial liabilities regarding transit delays caused by customs holds, public holidays, labor strikes, carrier oversights, or acts of God.</li>
+        </ul>
+
+        <h3>4. SYSTEM ACCESS & DISRUPTIONS</h3>
+        <p>We work to ensure continuous platform availability. However, we do not guarantee uninterrupted server operations. We reserve the absolute right to amend item prices, modify product descriptions, suspend stock listings, or cancel orders at our single discretion due to manufacturer listing inconsistencies, tech issues, or carrier outages. If we cancel an order, a full refund of any charged fees will be promptly dispatched.</p>
+
+        <h3>5. USER AGE ELIGIBILITY</h3>
+        <p>By interacting with this e-commerce site, you verify that you are at least the age of majority in your place of residence, or that you possess full consent to permit dependents under your custody to navigate this storefront.</p>
+      </div>
+
+      <!-- TAB 3: RETURNS & REFUNDS -->
+      <div id="legal-returns-content" style="display: none;">
+        <span style="color: var(--gray); font-size: 12px; font-family: var(--font-mono); text-transform: uppercase; display: block; margin-bottom: 15px;">Last Revised: June 18, 2026 | Document ID: PD-RR-2026-V1</span>
+        <p>At PAWDROP, we choose performance goods to ensure standard-setting utility and comfort for your pets. Because we operate an optimized direct-fulfillment dropshipping framework, our product return and customer reimbursement guidelines are strictly structured as follows:</p>
+
+        <h3>1. DEFECTIVE PARCELS & ACCIDENTAL DAMAGES</h3>
+        <p>If you receive a product that is damaged during transit, functionally defective, or different from the item ordered, you are protected by our direct warranty policy:</p>
+        <ul>
+          <li>You must submit a formal refund or replacement claim by contacting <strong>support@pawdrop.com</strong> within <strong>7 days of delivery</strong>.</li>
+          <li>Your claim email must include clear, high-resolution photographs and/or a video showing the defective product, the specific damage area, and the shipping parcel label.</li>
+          <li>Upon verification, PAWDROP will, at our sole cost, dispatch a brand new replacement product or issue a 100% financial refund. You are not required to return damaged goods in this instance.</li>
+        </ul>
+
+        <h3>2. STANDARD RETURN ELIGIBILITY</h3>
+        <p>If you change your mind regarding a purchase, you may request a standard return within <strong>14 days of receipt</strong> of the package, subject to the following severe constraints:</p>
+        <ul>
+          <li>The pet gear must be in pristine, unused condition, free of pet hair, scent, or signs of wear, and complete with all original tags attached.</li>
+          <li>All items must be repacked inside their <strong>complete original manufacturing packaging</strong>.</li>
+          <li><strong>Crucial:</strong> Product returns sent directly back to the manufacturer address, supplier coordinates, or global depot printed on the shipping container label without formal authorization from PAWDROP Support will not be processed, and no money refunds shall be issued.</li>
+        </ul>
+
+        <h3>3. PROCESS FOR AUTHORIZED RETURNS</h3>
+        <p>To initiate a standard eligible return, you must follow these sequential steps:</p>
+        <ol style="margin-left: 20px; line-height: 1.8; color: var(--gray); margin-bottom: 24px;">
+          <li style="margin-bottom: 8px;">Contact Support at support@pawdrop.com stating your Order ID, email address, and reason for return.</li>
+          <li style="margin-bottom: 8px;">Once approved, our team will supply you with our localized PAWDROP returns depot address and a Return Merchandise Authorization (RMA) ticket.</li>
+          <li style="margin-bottom: 8px;">Package the unused merchandise securely and ship it to the designated returns depot. The customer retains full responsibility for the shipping costs of standard returns; we do not provide prepaid shipping labels for buyer's-remorse situations. We strongly encourage shipping with tracking.</li>
+        </ol>
+
+        <h3>4. REVIEW TIMELINES & CREDITS</h3>
+        <p>Upon receipt of the returned item at our returns depot, our warehouse team will inspect the items to verify if they meet our condition standards. This review lasts up to 5 business days. Once approved, we will issue a transaction credit to your original payment platform. Please note that credit card institutions and payment networks usually take 5 to 10 business days to clear funds back to your statement.</p>
+      </div>
+
+      <!-- LEGAL DISCLAIMER -->
+      <div class="legal-disclaimer-box" style="margin-top: 50px; border-top: 1px dotted var(--border); padding-top: 30px; font-size: 13px; color: var(--gray); line-height: 1.6; text-align: justify; font-style: italic; background: rgba(var(--neon-rgb), 0.01); border-radius: 8px; padding: 25px;">
+        <strong style="color: var(--white); font-family: var(--font-display); text-transform: uppercase; font-size: 11px; display: block; margin-bottom: 8px; letter-spacing: 0.1em; color: var(--neon);">Disclaimer for PAWDROP Retailers</strong>
+        The legal policies, operational clauses, service guidelines, and cookie details loaded onto this website are provided as general, standardized illustrative templates for e-commerce dropshipping businesses. They do not constitute formal legal counsel. PAWDROP is not a law firm, and our staff do not provide legal advice. Because consumer tracking laws (such as GDPR, CCPA, and CPRA), dropship trade regulations, and product liabilities vary considerably across legal jurisdictions, we strongly advise you to have these policies reviewed, adjusted, and finalized by a professional legal counselor in your local jurisdiction before deploying them for active commercial transactions.
+      </div>
+
+    </div>
+  </section>
+
+  <!-- INTERACTIVE LEGAL TAB NAVIGATION SCRIPT -->
+  <script>
+    function switchLegalTab(tabId) {
+      // Hide all content containers
+      const contentIds = ['legal-privacy-content', 'legal-terms-content', 'legal-returns-content'];
+      contentIds.forEach(id => {
+        const checkEl = document.getElementById(id);
+        if (checkEl) checkEl.style.display = 'none';
+      });
+
+      // Show the selected container
+      const targetContent = document.getElementById('legal-' + tabId + '-content');
+      if (targetContent) {
+        targetContent.style.display = 'block';
+      }
+
+      // Reset tabs button styles
+      const tabs = ['privacy', 'terms', 'returns'];
+      tabs.forEach(t => {
+        const btn = document.getElementById('tab-' + t);
+        if (btn) {
+          if (t === tabId) {
+            btn.style.background = 'var(--neon)';
+            btn.style.color = 'var(--black)';
+            btn.style.borderColor = 'var(--neon)';
+            btn.style.fontWeight = '700';
+          } else {
+            btn.style.background = 'var(--black-2)';
+            btn.style.color = 'var(--gray)';
+            btn.style.borderColor = 'var(--border)';
+            btn.style.fontWeight = '600';
+          }
+        }
+      });
+
+      // Dynamically update headings
+      const labelEl = document.getElementById('legalLabel');
+      const titleEl = document.getElementById('legalTitle');
+      if (labelEl && titleEl) {
+        if (tabId === 'privacy') {
+          labelEl.textContent = 'Data & Identity protection';
+          titleEl.textContent = 'PRIVACY POLICY';
+        } else if (tabId === 'terms') {
+          labelEl.textContent = 'User Agreement & Shipping Conditions';
+          titleEl.textContent = 'TERMS OF SERVICE';
+        } else if (tabId === 'returns') {
+          labelEl.textContent = 'Product Satisfaction & Assurances';
+          titleEl.textContent = 'RETURNS & REFUNDS';
+        }
+      }
+
+      // Update URL hash dynamically without forced page refresh
+      try {
+        history.replaceState(null, null, '#' + tabId);
+      } catch(e) {}
+    }
+
+    // Handle hash state mapping upon layout mounting
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        const currentHash = window.location.hash.replace('#', '').toLowerCase();
+        if (['privacy', 'terms', 'returns'].includes(currentHash)) {
+          switchLegalTab(currentHash);
+        } else {
+          switchLegalTab('privacy'); // fallback
+        }
+      }, 50);
+    });
+  </script>
+
+  <!-- FOOTER -->
+  <footer class="footer" id="contact">
+    <!-- RECENTLY VIEWED SECTION -->
+    <div class="recently-viewed" id="recentlyViewedSection" style="display: none;">
+      <div class="recently-viewed__info">
+        <h3 class="recently-viewed__title">Recently Viewed</h3>
+        <button id="clearRecentlyViewed" class="recently-viewed__clear">Clear All</button>
+      </div>
+      <div class="recently-viewed__grid" id="recentlyViewedGrid">
+        <!-- Dynamic JS Content -->
+      </div>
+    </div>
+
+    <div class="footer__top" data-reveal>
+      <div class="footer__logo">
+        PAW<span class="neon">DROP</span>
+      </div>
+      <span class="footer__tag">GLOBAL PET STORE</span>
+    </div>
+    <div class="footer__grid" data-reveal>
+      <div class="footer__brand">
+        <p>Premium performance pet accessories,<br>
+           hand-selected and shipped worldwide.</p>
+        <div class="footer__social">
+          <!-- Instagram -->
+          <a class="footer__social-link" href="https://www.instagram.com/pawdrop_store/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+            <svg viewBox="0 0 24 24">
+              <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.051.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/>
+            </svg>
+          </a>
+          <!-- Facebook -->
+          <a class="footer__social-link" href="https://www.facebook.com/profile.php?id=61590642667482" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+            <svg viewBox="0 0 24 24">
+              <path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3l-.5 3h-2.5v6.8c4.56-.93 8-4.96 8-9.75z"/>
+            </svg>
+          </a>
+          <!-- X (Twitter) -->
+          <a class="footer__social-link" href="https://x.com/pawdrop_store" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)">
+            <svg viewBox="0 0 24 24">
+              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+      <div class="footer__links">
+        <h4>SHOP</h4>
+        <ul>
+          <li><a href="/shop.html?category=hydration">Water Fountains</a></li>
+          <li><a href="/shop.html?category=feeding">Pet Bowls</a></li>
+          <li><a href="/shop.html?category=safety">LED Collars</a></li>
+          <li><a href="/shop.html?category=play">Toys</a></li>
+          <li><a href="/shop.html?category=grooming">Grooming</a></li>
+        </ul>
+      </div>
+      <div class="footer__links">
+        <h4>INFO</h4>
+        <ul>
+          <li><a href="/about.html">About Us</a></li>
+          <li><a href="#" class="footerTrackBtnLink">Track Order</a></li>
+          <li><a href="/privacy.html#terms">Terms of Service</a></li>
+          <li><a href="/privacy.html#returns">Returns & Refunds</a></li>
+          <li><a href="/privacy.html#privacy">Privacy Policy</a></li>
+          <li><a href="/contact.html">Contact Support</a></li>
+        </ul>
+      </div>
+      <div class="footer__newsletter">
+        <h4>NEWSLETTER</h4>
+        <p>Subscribe for updates, exclusive offers, and pet care tips.</p>
+        <form class="newsletter-form" id="newsletterForm">
+          <input type="email" id="newsletterEmail" class="newsletter-input" placeholder="Enter your email" required aria-label="Email Address">
+          <button type="submit" class="newsletter-btn">→</button>
+        </form>
+        <div class="newsletter-msg" id="newsletterMsg"></div>
+      </div>
+    </div>
+    <div class="footer__bottom">
+      <span>© 2026 PAWDROP. ALL RIGHTS RESERVED.</span>
+      <div class="footer__right-col">
+        <div class="footer__payments" style="display: flex; gap: 10px; margin-bottom: 10px;">
+          <!-- PayPal -->
+          <svg viewBox="0 0 24 24" fill="var(--gray)" width="24" height="24">
+            <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944 3.72a.641.641 0 0 1 .633-.535h6.666c3.238 0 5.41.97 6.096 3.618.358 1.385.168 2.871-.564 4.093-.972 1.626-2.82 2.753-5.26 2.753H9.86a.641.641 0 0 0-.623.491L7.076 21.337z"/>
+          </svg>
+          <!-- Apple Pay -->
+          <svg viewBox="0 0 24 24" fill="var(--gray)" width="24" height="24">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-.92 16.5c-2.87 0-5.22-2.31-5.22-5.18 0-2.85 2.3-5.17 5.15-5.17 2.86 0 5.23 2.3 5.23 5.15 0 2.86-2.35 5.2-5.16 5.2z"/>
+          </svg>
+          <!-- Klarna -->
+          <svg viewBox="0 0 24 24" fill="var(--gray)" width="24" height="24">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/>
+          </svg>
+        </div>
+        <span class="neon">MADE WITH ♥ FOR PETS WORLDWIDE</span>
+        <a href="/admin.html" class="admin-dots" title="Admin Panel">•••</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- CART SIDEBAR -->
+  <div class="cart-overlay" id="cartOverlay"></div>
+  <aside class="cart" id="cartSidebar">
+    <div class="cart__header">
+      <h3>YOUR CART</h3>
+      <button class="cart__close" id="cartClose" aria-label="Close Cart">✕</button>
+    </div>
+    <div class="cart__items" id="cartItems"></div>
+    <div class="cart__footer">
+      <div class="cart__subtotal">
+        <span>SUBTOTAL</span>
+        <span class="neon" id="cartTotal">$0.00</span>
+      </div>
+      <button class="btn btn--fill btn--full" id="checkoutBtn">
+        CHECKOUT →
+      </button>
+    </div>
+  </aside>
+
+  <!-- CHECKOUT MODAL -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal" id="checkoutModal">
+      <button class="modal__close" id="modalClose" aria-label="Close Checkout">✕</button>
+      <h2>COMPLETE ORDER</h2>
+      <form class="checkout-form" id="checkoutForm">
+        <div class="form-group">
+          <label>FULL NAME</label>
+          <input type="text" required placeholder="John Doe">
+        </div>
+        <div class="form-group">
+          <label>EMAIL ADDRESS</label>
+          <input type="email" required placeholder="john@email.com">
+        </div>
+        <div class="form-group">
+          <label>PHONE NUMBER</label>
+          <input type="tel" placeholder="+1 234 567 890">
+        </div>
+        <div class="form-group">
+          <label>SHIPPING ADDRESS</label>
+          <input type="text" required placeholder="123 Main St">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>CITY</label>
+            <input type="text" required placeholder="New York">
+          </div>
+          <div class="form-group">
+            <label>COUNTRY</label>
+            <input type="text" required placeholder="USA">
+          </div>
+        </div>
+        <button type="submit" class="btn btn--fill btn--full" id="checkoutSubmit">COMPLETE ORDER - <span id="checkoutFinalTotal">$0.00</span></button>
+      </form>
+    </div>
+  </div>
+
+  <!-- AUTH MODAL -->
+  <div class="modal-overlay" id="authOverlay">
+    <div class="modal" id="authModal">
+      <button class="modal__close" id="authClose" aria-label="Close Auth">✕</button>
+      <div class="auth-tabs" style="display: flex; gap: 20px; margin-bottom: 30px; border-bottom: 1px solid var(--border);">
+        <button class="auth-tab is-active" id="tabSignIn" style="background:none; border:none; color:var(--neon); font-family:var(--font-display); font-size:18px; padding-bottom:10px; cursor:pointer;">SIGN IN</button>
+        <button class="auth-tab" id="tabSignUp" style="background:none; border:none; color:var(--gray); font-family:var(--font-display); font-size:18px; padding-bottom:10px; cursor:pointer;">SIGN UP</button>
+      </div>
+
+      <form class="checkout-form" id="signInForm">
+        <div class="form-group">
+          <label>EMAIL ADDRESS</label>
+          <input type="email" required placeholder="john@email.com">
+        </div>
+        <div class="form-group">
+          <label>PASSWORD</label>
+          <input type="password" required placeholder="••••••••">
+        </div>
+        <button type="submit" class="btn btn--fill btn--full">SIGN IN →</button>
+      </form>
+
+      <form class="checkout-form" id="signUpForm" style="display: none;">
+        <div class="form-group">
+          <label>FULL NAME</label>
+          <input type="text" required placeholder="John Doe">
+        </div>
+        <div class="form-group">
+          <label>EMAIL ADDRESS</label>
+          <input type="email" required placeholder="john@email.com">
+        </div>
+        <div class="form-group">
+          <label>PASSWORD</label>
+          <input type="password" required placeholder="••••••••" minlength="6">
+        </div>
+        <button type="submit" class="btn btn--fill btn--full">CREATE ACCOUNT →</button>
+      </form>
+      <div id="authMsg" style="margin-top: 15px; font-family: var(--font-mono); font-size: 14px; text-align: center; color: var(--neon); display: none;"></div>
+    </div>
+  </div>
+
+  <!-- TRACKING MODAL -->
+  <div class="modal-overlay" id="trackingOverlay">
+    <div class="modal" id="trackingModal">
+      <button class="modal__close" id="trackingClose" aria-label="Close Tracking">✕</button>
+      <h2>TRACK ORDER</h2>
+      <form class="checkout-form" id="trackingForm">
+        <div class="form-group">
+          <label>ORDER ID</label>
+          <input type="text" id="trackOrderId" required placeholder="PAWDROP-XXXXX">
+        </div>
+        <div class="form-group">
+          <label>EMAIL ADDRESS</label>
+          <input type="email" id="trackEmail" required placeholder="john@email.com">
+        </div>
+        <button type="submit" class="btn btn--fill btn--full" id="trackSubmitBtn">
+          CHECK STATUS →
+        </button>
+      </form>
+      <div id="trackingResult" hidden></div>
+    </div>
+  </div>
+
+</body>
+</html>

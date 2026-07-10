@@ -1,0 +1,6 @@
+{
+  "name": "PAWDROP",
+  "description": "Premium pet accessories and gear ecommerce store with 3D particles background, smooth scrolling, and scroll-triggered animations.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

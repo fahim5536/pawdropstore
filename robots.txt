@@ -1,0 +1,21 @@
+# Robots.txt for PAWDROP storefront (https://pawdrop.example.com)
+# Optimized for Googlebot, Bingbot, and general search crawlers
+
+User-agent: *
+Allow: /
+Allow: /index.html
+Allow: /shop.html
+Allow: /about.html
+Allow: /contact.html
+Allow: /faq.html
+Allow: /privacy.html
+
+# Prevent indexing of session/user-specific nodes or admin dashboard
+Disallow: /admin.html
+Disallow: /profile.html
+Disallow: /wishlist.html
+Disallow: /api/
+Disallow: /cj-admin/
+
+# Link to XML Sitemap
+Sitemap: https://pawdrop.example.com/sitemap.xml

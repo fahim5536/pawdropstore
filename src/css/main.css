@@ -1,0 +1,215 @@
+@import "tailwindcss";
+
+/* Import Base Styles */
+@import "./base/variables.css";
+@import "./base/reset.css";
+@import "./base/typography.css";
+
+/* Import Component Styles */
+@import "./components/navbar.css";
+@import "./components/hero.css";
+@import "./components/brands.css";
+@import "./components/marquee.css";
+@import "./components/products.css";
+@import "./components/cart.css";
+@import "./components/checkout.css";
+@import "./components/tracking.css";
+@import "./components/faq.css";
+@import "./components/footer.css";
+
+/* Import Utility Styles */
+@import "./utils/animations.css";
+@import "./utils/responsive.css";
+
+/* LOADING SPINNER CSS */
+.loading-box {
+  text-align: center;
+}
+.loading-spinner {
+  width: 60px;
+  height: 60px;
+  border: 3px solid var(--black-3);
+  border-top-color: var(--neon);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 24px;
+  box-shadow: 0 0 20px rgba(var(--neon-rgb),0.3);
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.loading-text {
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--neon);
+}
+
+/* === BRANDS SECTION === */
+.brands {
+  padding: 80px 0;
+  overflow: hidden;
+  border-bottom: 1px solid var(--border);
+  background: var(--black);
+}
+
+.brands__header {
+  text-align: center;
+  margin-bottom: 52px;
+}
+
+.brands__label {
+  font-family: 'Syne', sans-serif; /* assuming Syne or var(--font-display) */
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  color: var(--gray);
+  margin-top: 8px;
+  text-transform: uppercase;
+}
+
+/* Scrolling rows */
+.brands__row {
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+.brands__row:last-child {
+  margin-bottom: 0;
+}
+
+.brands__track {
+  display: flex;
+  gap: 16px;
+  width: max-content;
+  padding: 8px 0;
+}
+
+/* Row 1: left scroll */
+.brands__row--left .brands__track {
+  animation: brandLeft 30s linear infinite;
+}
+
+/* Row 2: right scroll */
+.brands__row--right .brands__track {
+  animation: brandRight 30s linear infinite;
+}
+
+/* Pause on hover */
+.brands__row:hover .brands__track {
+  animation-play-state: paused;
+}
+
+@keyframes brandLeft {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+@keyframes brandRight {
+  from { transform: translateX(-50%); }
+  to   { transform: translateX(0); }
+}
+
+/* Brand card */
+.brand-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  width: 180px;
+  height: 120px;
+  background: var(--black-2);
+  border: 1px solid var(--border);
+  padding: 20px 24px;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.35s ease,
+              background 0.35s ease,
+              transform 0.35s ease;
+  cursor: pointer;
+}
+
+/* Top neon line on hover */
+.brand-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--neon);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s ease;
+}
+
+.brand-card:hover {
+  border-color: rgba(210,255,0,0.25);
+  background: rgba(210,255,0,0.04);
+  transform: translateY(-3px);
+}
+
+.brand-card:hover::before {
+  transform: scaleX(1);
+}
+
+/* Logo image wrapper */
+.brand-card__img-wrap {
+  width: 100%;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.brand-card__img-wrap img {
+  max-height: 48px;
+  max-width: 130px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  /* Default: grayscale + dim */
+  filter: grayscale(100%) brightness(0.6) contrast(1.1);
+  opacity: 0.65;
+  transition: filter 0.4s ease,
+              opacity 0.4s ease,
+              transform 0.4s ease;
+}
+
+/* Hover: full color */
+.brand-card:hover .brand-card__img-wrap img {
+  filter: none;
+  opacity: 1;
+  transform: scale(1.08);
+}
+
+/* Brand name */
+.brand-card__name {
+  font-family: 'Syne', sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--gray-2);
+  text-transform: uppercase;
+  transition: color 0.3s ease;
+}
+
+.brand-card:hover .brand-card__name {
+  color: var(--neon);
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .brand-card {
+    width: 140px;
+    height: 100px;
+    padding: 16px;
+  }
+  .brand-card__img-wrap img {
+    max-height: 36px;
+    max-width: 100px;
+  }
+  .brands {
+    padding: 60px 0;
+  }
+}

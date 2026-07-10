@@ -1,0 +1,106 @@
+.brands {
+  padding: 80px 0;
+  overflow: hidden;
+  border-bottom: 1px solid var(--border);
+}
+
+.brands__header {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.brands__label {
+  font-family: 'Syne', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--gray);
+  margin-top: 8px;
+  text-transform: uppercase;
+}
+
+/* Each row */
+.brands__row {
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+.brands__row:last-child { margin-bottom: 0; }
+
+/* The scrolling track */
+.brands__track {
+  display: flex;
+  gap: 20px;
+  width: max-content;
+}
+
+/* Row 1 scrolls left */
+.brands__row--left .brands__track {
+  animation: brandScrollLeft 25s linear infinite;
+}
+
+/* Row 2 scrolls right */
+.brands__row--right .brands__track {
+  animation: brandScrollRight 25s linear infinite;
+}
+
+/* Pause on hover */
+.brands__row:hover .brands__track {
+  animation-play-state: paused;
+}
+
+@keyframes brandScrollLeft {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+@keyframes brandScrollRight {
+  from { transform: translateX(-50%); }
+  to   { transform: translateX(0); }
+}
+
+/* Individual brand card */
+.brand-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 180px;
+  height: 110px;
+  background: var(--black-2);
+  border: 1px solid var(--border);
+  padding: 20px 24px;
+  flex-shrink: 0;
+  transition: border-color 0.3s, background 0.3s;
+}
+
+.brand-card:hover {
+  border-color: var(--neon);
+  background: rgba(var(--neon-rgb),0.04);
+}
+
+.brand-card svg {
+  transition: transform 0.3s ease, 
+              filter 0.3s ease;
+  filter: grayscale(40%) brightness(0.8);
+  border-radius: 6px;
+}
+
+.brand-card:hover svg {
+  filter: grayscale(0%) brightness(1);
+  transform: scale(1.08);
+}
+
+.brand-card__name {
+  font-family: 'Syne', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: var(--gray);
+  text-transform: uppercase;
+  transition: color 0.3s;
+}
+
+.brand-card:hover .brand-card__name {
+  color: var(--neon);
+}

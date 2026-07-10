@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Profile — PAWDROP</title>
+
+  <!-- Google Fonts: Space Grotesk + Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Syne:wght@400;500;600;700;800&family=Space+Mono&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="/src/css/main.css">
+  <link rel="stylesheet" href="/src/css/profile.css">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script>try{document.documentElement.setAttribute('data-theme', localStorage.getItem('pawdrop_theme') || 'dark');}catch(e){document.documentElement.setAttribute('data-theme', 'dark');}</script>
+</head>
+<body>
+
+  <!-- NAVBAR (Simplified for profile page) -->
+  <nav class="nav" id="nav">
+    <div class="nav__inner container mx-auto px-4 md:px-8">
+      <div class="nav__brand-wrapper">
+        <a href="#" id="backBtn" class="nav__back-btn" aria-label="Go Back" style="display: none;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 24px; height: 24px;">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+        </a>
+        <a class="nav__logo" href="index.html" style="padding-left: 0 !important;">
+          PAW<span class="neon">DROP</span>
+        </a>
+      </div>
+      
+      
+      
+      <ul class="nav__links">
+        <li><a href="index.html">HOME</a></li>
+        <li><a href="shop.html">SHOP</a></li>
+        <li><a href="orders.html">TRACK ORDER</a></li>
+        <li><a href="about.html">ABOUT</a></li>
+        <li><a href="contact.html">CONTACT</a></li>
+      </ul>
+
+
+
+      <div class="nav__actions">
+
+        <select class="currency-switcher neon">
+          <option value="USD" style="background: var(--black); color: var(--neon);">USD ($)</option>
+          <option value="EUR" style="background: #111; color: var(--neon);">EUR (€)</option>
+          <option value="GBP" style="background: #111; color: var(--neon);">GBP (£)</option>
+        </select>
+
+        <button class="nav__user" id="themeToggleBtn" aria-label="Toggle Theme" style="background: none; border: none; color: var(--white); cursor: pointer; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; transition: color 0.3s ease;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px;">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+
+        
+        <div class="nav__search">
+          <input type="text" id="navSearchInput" placeholder="Search..." aria-label="Search products">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+        </div>
+        
+        <button class="nav__user" id="authBtn" aria-label="Sign In" style="background: none; border: none; color: var(--white); cursor: pointer; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; transition: color 0.3s ease;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px;">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </button>
+
+        <a href="/profile.html" class="nav__user" id="profileBtn" aria-label="Profile" style="background: none; border: none; color: var(--white); cursor: pointer; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; transition: color 0.3s ease; text-decoration: none; display: none;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px;">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </a>
+
+        
+        
+        <a href="/wishlist.html" class="nav__user" id="wishlistBtn" aria-label="Wishlist" style="background: none; border: none; color: var(--white); cursor: pointer; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; transition: color 0.3s ease; position: relative; text-decoration: none;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px;" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+          </svg>
+          <span class="nav__cart-count" id="wishlistCount" style="right: 2px;">0</span>
+        </a>
+        <button class="nav__cart" id="cartBtn" aria-label="Shopping Cart">
+          <!-- Shopping Bag Icon SVG -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4H6z"></path>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <path d="M16 10a4 4 0 0 1-8 0"></path>
+          </svg>
+          <span class="nav__cart-count" id="cartCount">0</span>
+        </button>
+        <button class="nav__burger" id="burger" aria-label="Toggle Menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- MOBILE HORIZONTAL NAV BAR -->
+    <div class="nav__mobile-bar">
+      <a href="index.html">HOME</a>
+      <a href="shop.html">SHOP</a>
+      <a href="orders.html">TRACK ORDER</a>
+      <a href="about.html">ABOUT</a>
+      <a href="contact.html">CONTACT</a>
+    </div>
+  </nav>
+
+  
+<!-- MOBILE MENU -->
+  
+  
+  
+  <!-- MOBILE MENU START -->
+  <div class="mobile-menu" id="mobileMenu">
+    <div class="mobile-menu__header">
+      <div class="mobile-menu__title">PAW<span style="color: var(--neon);">DROP</span></div>
+      <button class="mobile-menu__close" id="mobileMenuCloseBtn" aria-label="Close Menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <ul class="mobile-menu__items">
+      <li>
+        <a href="profile.html" class="mobile-menu__link">
+          <div class="mobile-menu__icon-container">
+            <svg class="mobile-menu__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+          </div>
+          <span>PROFILE</span>
+        </a>
+      </li>
+      <li>
+        <div class="mobile-menu__link mobile-menu__search-link">
+          <div class="mobile-menu__icon-container">
+            <svg class="mobile-menu__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </div>
+          <input type="text" id="mobileSearchInput" placeholder="SEARCH" />
+          <button id="mobileSearchBtn" aria-label="Search" class="mobile-menu__search-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
+        </div>
+      </li>
+      <li>
+        <a href="wishlist.html" class="mobile-menu__link">
+          <div class="mobile-menu__icon-container">
+            <svg class="mobile-menu__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+            </svg>
+          </div>
+          <span>MY WISHLIST</span>
+          <span class="mobile-menu__badge" id="wishlistCount">0</span>
+        </a>
+      </li>
+      <li class="mobile-menu__separator"></li>
+      <li class="mobile-menu__section-title">SETTINGS & INFO</li>
+      <li class="mobile-menu__setting-item">
+        <span class="setting-label">Currency</span>
+        <select class="currency-switcher neon mobile-currency-switcher" style="padding: 4px 10px; font-size: 12px; font-weight: 600; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1); color: var(--neon); border-radius: 6px; cursor: pointer; height: 32px; font-family: var(--font-sans);">
+          <option value="USD">USD ($)</option>
+          <option value="EUR">EUR (€)</option>
+          <option value="GBP">GBP (£)</option>
+        </select>
+      </li>
+      <li class="mobile-menu__setting-item">
+        <span class="setting-label">Theme</span>
+        <button class="outline-btn" id="mobileThemeToggleBtn" style="padding: 4px 10px; font-size: 11px; font-weight: 700; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1); color: var(--white); border-radius: 6px; cursor: pointer; height: 32px; text-transform: uppercase; letter-spacing: 0.03em; font-family: var(--font-sans);">
+          TOGGLE THEME
+        </button>
+      </li>
+      <li>
+        <a href="faq.html" class="mobile-menu__link">
+          <div class="mobile-menu__icon-container">
+            <svg class="mobile-menu__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+          </div>
+          <span>FAQ & HELP CENTER</span>
+        </a>
+      </li>
+      <li>
+        <a href="about.html" class="mobile-menu__link">
+          <div class="mobile-menu__icon-container">
+            <svg class="mobile-menu__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="16" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+          </div>
+          <span>ABOUT OUR STORE</span>
+        </a>
+      </li>
+      <li>
+        <a href="contact.html" class="mobile-menu__link">
+          <div class="mobile-menu__icon-container">
+            <svg class="mobile-menu__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+              <polyline points="22,6 12,13 2,6"></polyline>
+            </svg>
+          </div>
+          <span>CONTACT SUPPORT</span>
+        </a>
+      </li>
+    </ul>
+  </div>
+  <!-- MOBILE MENU END --><main class="page-content profile-page">
+    <div class="profile-header">
+      <h1 class="page-title">MY <span class="neon">PROFILE</span></h1>
+    </div>
+
+    <div class="profile-layout">
+      <!-- Sidebar -->
+      <aside class="profile-sidebar">
+        <div class="profile-avatar">
+          <div id="avatarInitials" class="avatar-circle"></div>
+          <p id="profileName" class="profile-name">Loading...</p>
+          <p id="profileEmail" class="profile-email">loading@pawdrop.com</p>
+        </div>
+        <ul class="profile-nav">
+          <li><a href="#" class="active" data-target="details">Account Details</a></li>
+          <li><a href="#" data-target="password">Change Password</a></li>
+          <li><a href="/orders.html">Order History</a></li>
+          <li style="margin-top: 32px;"><a href="#" id="logoutBtn" style="color: #ff4d4d;">Logout</a></li>
+        </ul>
+      </aside>
+
+      <!-- Main Content -->
+      <div class="profile-main">
+        
+        <!-- Account Details -->
+        <section id="section-details" class="profile-section active">
+          <h2>Account Details</h2>
+          <form id="profileUpdateForm" class="profile-form">
+            <div class="form-group">
+              <label>Full Name</label>
+              <input type="text" id="updateName" required>
+            </div>
+            <div class="form-group">
+              <label>Email Address</label>
+              <input type="email" id="updateEmail" disabled>
+              <span style="font-size: 11px; color: var(--gray);">Email cannot be changed directly</span>
+            </div>
+            <button type="submit" class="btn btn--neon">SAVE CHANGES</button>
+            <p id="updateMsg" class="msg"></p>
+          </form>
+        </section>
+
+        <!-- Change Password -->
+        <section id="section-password" class="profile-section">
+          <h2>Change Password</h2>
+          <form id="passwordUpdateForm" class="profile-form">
+            <div class="form-group">
+              <label>Current Password</label>
+              <input type="password" id="currentPassword" required>
+            </div>
+            <div class="form-group">
+              <label>New Password</label>
+              <input type="password" id="newPassword" required minlength="6">
+            </div>
+            <div class="form-group">
+              <label>Confirm New Password</label>
+              <input type="password" id="confirmNewPassword" required minlength="6">
+            </div>
+            <button type="submit" class="btn btn--outline">UPDATE PASSWORD</button>
+            <p id="pwdMsg" class="msg"></p>
+          </form>
+        </section>
+
+      </div>
+    </div>
+  </main>
+
+   <!-- Firebase CDN compatibility scripts -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script type="module" src="/src/js/profile.js"></script>
+</body>
+</html>

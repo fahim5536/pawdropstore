@@ -1,0 +1,94 @@
+{
+  "entities": {
+    "Product": {
+      "title": "Product",
+      "description": "A pet product catalog item cached in Firestore for real-time storefront search rendering",
+      "type": "object",
+      "properties": {
+        "id": { "type": "number" },
+        "name": { "type": "string" },
+        "category": { "type": "string" },
+        "price": { "type": "number" },
+        "desc": { "type": "string" },
+        "img": { "type": "string" },
+        "sold": { "type": "number" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "name", "category", "price", "desc", "img", "sold", "updatedAt"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "A customer's order for products",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "customer": { "type": "object" },
+        "items": { "type": "array" },
+        "total": { "type": "number" },
+        "createdAt": { "type": "number" },
+        "status": { "type": "string" }
+      },
+      "required": ["userId", "customer", "items", "total", "createdAt", "status"]
+    },
+    "UserData": {
+      "title": "UserData",
+      "description": "Stored cart and wishlist details for a user",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "email": { "type": "string" },
+        "cart": { "type": "array" },
+        "wishlist": { "type": "array" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["userId", "email", "cart", "wishlist", "updatedAt"]
+    },
+    "Inventory": {
+      "title": "Inventory",
+      "description": "Stock count of a product",
+      "type": "object",
+      "properties": {
+        "productId": { "type": "number" },
+        "stock": { "type": "number" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["productId", "stock", "updatedAt"]
+    },
+    "Review": {
+      "title": "Review",
+      "description": "A customer's review for a product",
+      "type": "object",
+      "properties": {
+        "productId": { "type": "number" },
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "rating": { "type": "number" },
+        "reviewText": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["productId", "userId", "userName", "rating", "reviewText", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/products/{productId}": {
+      "schema": { "$ref": "#/entities/Product" },
+      "description": "Catalog of active pet care products cached for real-time storefront search"
+    },
+    "/inventory/{productId}": {
+      "schema": { "$ref": "#/entities/Inventory" },
+      "description": "Inventory stock counts for products"
+    },
+    "/orders/{orderId}": {
+      "schema": { "$ref": "#/entities/Order" },
+      "description": "Collection of all placed orders"
+    },
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserData" },
+      "description": "Collection of persistent user-specific session data"
+    },
+    "/reviews/{reviewId}": {
+      "schema": { "$ref": "#/entities/Review" },
+      "description": "Collection of all submitted product reviews"
+    }
+  }
+}

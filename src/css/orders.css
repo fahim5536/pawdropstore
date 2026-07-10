@@ -1,0 +1,136 @@
+.track-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 80px 20px;
+}
+
+.track-hero {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.track-hero h1 {
+  font-family: var(--font-display);
+  font-size: 40px;
+  text-transform: uppercase;
+  margin: 16px 0;
+}
+
+.track-hero p {
+  color: var(--gray);
+  font-size: 16px;
+}
+
+.track-search {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  margin-bottom: 40px;
+  width: 100%;
+  max-width: 500px;
+}
+
+.track-input {
+  flex: 1;
+  background: var(--black-2);
+  border: 1px solid var(--border);
+  color: var(--white);
+  padding: 0 20px;
+  font-family: var(--font-mono);
+  font-size: 16px;
+  height: 52px;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.track-input:focus {
+  border-color: var(--neon);
+}
+
+.order-result {
+  width: 100%;
+  max-width: 640px;
+}
+
+.order-card {
+  background: var(--black-2);
+  border-left: 3px solid var(--neon);
+  padding: 40px;
+  margin: 0 auto;
+}
+
+.order-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.order-status {
+  font-family: var(--font-display);
+  font-weight: bold;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+}
+
+.order-item {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.order-item img {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.timeline-step {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 0;
+}
+
+.timeline-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--gray);
+}
+
+.timeline-step.done .timeline-dot {
+  background: var(--neon);
+  border-color: var(--neon);
+  box-shadow: 0 0 8px rgba(210, 255, 0, 0.3);
+}
+
+.order-card__total {
+  text-align: right;
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: bold;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+@media (max-width: 600px) {
+  .track-search {
+    flex-direction: column;
+  }
+  .order-card {
+    padding: 24px;
+  }
+}
+
+@keyframes pulse {
+  0% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.1); }
+  100% { opacity: 1; transform: scale(1); }
+}

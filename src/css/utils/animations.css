@@ -1,0 +1,68 @@
+/* Preloader styles */
+.preloader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: var(--bg-alpha);
+  backdrop-filter: blur(10px);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 40px;
+}
+
+.preloader__logo {
+  font-family: var(--font-display);
+  font-size: 48px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: var(--white);
+  will-change: transform, opacity;
+}
+
+.preloader__line {
+  width: 300px;
+  height: 2px;
+  background-color: var(--border);
+  position: relative;
+  overflow: hidden;
+  border-radius: 2px;
+}
+
+.preloader__bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, #b0ff00, #d5ff66);
+  transform: scaleX(0);
+  transform-origin: left;
+  will-change: transform;
+  box-shadow: 0 0 10px rgba(176, 255, 0, 0.5);
+}
+
+.preloader__count {
+  font-family: var(--font-mono);
+  font-size: 16px;
+  color: var(--neon);
+  letter-spacing: 0.2em;
+  font-weight: bold;
+}
+
+/* Scroll reveals initial states */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(60px);
+  transition: opacity 0.8s cubic-bezier(0.215, 0.61, 0.355, 1), transform 0.8s cubic-bezier(0.215, 0.61, 0.355, 1);
+  will-change: opacity, transform;
+}
+
+[data-reveal].is-revealed {
+  opacity: 1;
+  transform: translateY(0);
+}

@@ -1,0 +1,122 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+    
+    function isSignedIn() { return request.auth != null; }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+
+    function isValidOrder(data) {
+      return data.keys().hasAll(['userId', 'customer', 'items', 'total', 'createdAt', 'status'])
+        && data.keys().size() == 6
+        && data.userId == request.auth.uid
+        && data.customer is map
+        && data.items is list
+        && data.items.size() > 0
+        && data.total is number 
+        && data.createdAt is number
+        && data.status is string;
+    }
+
+    function isValidUserData(data) {
+      return data.keys().hasAll(['userId', 'email', 'cart', 'wishlist', 'updatedAt'])
+        && data.keys().size() == 5
+        && data.userId == request.auth.uid
+        && data.email is string
+        && data.cart is list
+        && data.wishlist is list
+        && data.updatedAt is string;
+    }
+
+    function isValidInventory(data) {
+      return data.keys().hasAll(['productId', 'stock', 'updatedAt'])
+        && data.keys().size() == 3
+        && data.productId is number
+        && data.stock is number
+        && data.updatedAt is string;
+    }
+
+    function isValidProduct(data) {
+      return data.keys().hasAll(['id', 'name', 'category', 'price', 'desc', 'img', 'sold', 'updatedAt'])
+        && data.keys().size() == 8
+        && data.id is number
+        && data.name is string && data.name.size() <= 200
+        && data.category is string
+        && data.price is number
+        && data.desc is string && data.desc.size() <= 2000
+        && data.img is string
+        && data.sold is number
+        && data.updatedAt is string;
+    }
+
+    function isValidReview(data) {
+      return data.keys().hasAll(['productId', 'userId', 'userName', 'rating', 'reviewText', 'createdAt'])
+        && data.keys().size() == 6
+        && data.userId == request.auth.uid
+        && data.userName is string && data.userName.size() <= 200
+        && data.rating is number && data.rating >= 1 && data.rating <= 5
+        && data.reviewText is string && data.reviewText.size() <= 2000
+        && data.productId is number
+        && data.createdAt is string;
+    }
+
+    match /products/{productId} {
+      allow read, list: if true;
+      allow create, update: if isSignedIn() && isValidId(productId) && isValidProduct(incoming());
+      allow delete: if false;
+    }
+
+    match /inventory/{productId} {
+      allow read: if true;
+      allow create, update: if isSignedIn() && isValidId(productId) && isValidInventory(incoming());
+      allow delete: if false;
+    }
+
+    match /users/{userId} {
+      allow get: if isSignedIn() && isValidId(userId) && userId == request.auth.uid;
+      allow create, update: if isSignedIn() && isValidId(userId) && userId == request.auth.uid && isValidUserData(incoming());
+      allow delete, list: if false;
+    }
+
+    match /orders/{orderId} {
+      // Users can read their own orders
+      allow get: if isSignedIn() && isValidId(orderId) && existing().userId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      
+      // Users can create their own orders
+      allow create: if isSignedIn() 
+        && isValidId(orderId)
+        && isValidOrder(incoming())
+        && incoming().createdAt == request.time.toMillis() || incoming().createdAt > 0;
+        
+      // Orders are immutable
+      allow update, delete: if false;
+    }
+
+    match /reviews/{reviewId} {
+      // Reviews are public
+      allow read, list: if true;
+
+      // Author can create when signed in
+      allow create: if isSignedIn()
+        && isValidId(reviewId)
+        && isValidReview(incoming());
+
+      // Author can update if signed in and matches
+      allow update: if isSignedIn()
+        && isValidId(reviewId)
+        && existing().userId == request.auth.uid
+        && isValidReview(incoming())
+        && incoming().productId == existing().productId;
+
+      // Author can delete
+      allow delete: if isSignedIn()
+        && isValidId(reviewId)
+        && existing().userId == request.auth.uid;
+    }
+  }
+}

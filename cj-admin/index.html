@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CJDropshipping Product Importer — CJ-Admin</title>
+  <script>try{document.documentElement.setAttribute('data-theme', localStorage.getItem('pawdrop_theme') || 'dark');}catch(e){document.documentElement.setAttribute('data-theme', 'dark');}</script>
+  
+  <!-- Modern clean Display and Mono fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg: #090a0f;
+      --panel: #11131c;
+      --border: #1f2335;
+      --text: #c0caf5;
+      --text-muted: #565f89;
+      --neon: #39fd9e;
+      --neon-glow: rgba(57, 253, 158, 0.15);
+      --error: #fb4765;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --primary: #5c62d6;
+    }
+
+    [data-theme="light"] {
+      --bg: #f4f4f7;
+      --panel: #ffffff;
+      --border: #e4e4e9;
+      --text: #1f2335;
+      --text-muted: #6b7280;
+      --neon: #059669;
+      --neon-glow: rgba(5, 150, 105, 0.15);
+      --primary: #4f46e5;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      letter-spacing: -0.011em;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 850px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    /* HEADER */
+    .header {
+      padding: 32px;
+      background: rgba(255, 255, 255, 0.01);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header-title-wrap h1 {
+      font-size: 20px;
+      font-weight: 600;
+      color: #fff;
+      letter-spacing: -0.02em;
+      text-transform: uppercase;
+      font-family: var(--font-sans);
+    }
+
+    .header-title-wrap h1 span {
+      background: linear-gradient(90deg, var(--neon), var(--primary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: 700;
+    }
+
+    .header-title-wrap p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .pill-badge {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      background: rgba(57, 253, 158, 0.08);
+      border: 1px solid rgba(57, 253, 158, 0.2);
+      color: var(--neon);
+      padding: 4px 8px;
+      border-radius: 100px;
+      letter-spacing: 0.05em;
+    }
+
+    /* GRID WORKSPACE */
+    .workspace {
+      display: grid;
+      grid-template-columns: 1fr;
+      padding: 32px;
+      gap: 32px;
+    }
+
+    @media (min-width: 768px) {
+      .workspace {
+        grid-template-columns: 1.2fr 1fr;
+      }
+    }
+
+    /* IMPORTER FORM PANEL */
+    .importer-section {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .section-label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .search-row {
+      display: flex;
+      gap: 12px;
+    }
+
+    .input-field {
+      flex: 1;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: #fff;
+      font-family: var(--font-mono);
+      font-size: 14px;
+      padding: 12px 16px;
+      border-radius: 6px;
+      outline: none;
+      transition: all 0.20s ease-in-out;
+    }
+
+    .input-field:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(92, 98, 214, 0.15);
+    }
+
+    .input-field::placeholder {
+      color: var(--text-muted);
+    }
+
+    .btn {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      padding: 12px 24px;
+      font-family: var(--font-sans);
+      font-weight: 600;
+      font-size: 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn:hover {
+      opacity: 0.95;
+      transform: translateY(-1px);
+    }
+
+    .btn:disabled {
+      background: var(--border);
+      color: var(--text-muted);
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn--outline {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    .btn--outline:hover {
+      background: rgba(255, 255, 255, 0.02);
+      border-color: var(--text-muted);
+    }
+
+    .btn--success {
+      background: var(--neon);
+      color: var(--bg);
+    }
+
+    .btn--success:hover {
+      box-shadow: 0 0 15px var(--neon-glow);
+    }
+
+    /* CARD FIELDS AUTOPOPULATED */
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .field-label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .field-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .field-badge {
+      font-size: 9px;
+      font-family: var(--font-mono);
+      font-weight: bold;
+      text-transform: uppercase;
+      padding: 2px 6px;
+      border-radius: 4px;
+      letter-spacing: 0.05em;
+    }
+
+    .field-badge.readonly {
+      background: rgba(86, 95, 137, 0.15);
+      color: var(--text-muted);
+    }
+
+    .field-badge.editable {
+      background: rgba(57, 253, 158, 0.1);
+      color: var(--neon);
+    }
+
+    .input-field--readonly {
+      background: rgba(31, 35, 53, 0.3);
+      border-color: var(--border);
+      color: #9299ba;
+      cursor: not-allowed;
+    }
+
+    .input-field--readonly:focus {
+      border-color: var(--border);
+      box-shadow: none;
+    }
+
+    textarea.input-field {
+      resize: none;
+      line-height: 1.5;
+    }
+
+    /* PREVIEW CONTAINER */
+    .preview-section {
+      background: rgba(255, 255, 255, 0.01);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 300px;
+      text-align: center;
+      position: relative;
+    }
+
+    .preview-placeholder {
+      color: var(--text-muted);
+    }
+
+    .preview-placeholder svg {
+      color: var(--border);
+      margin-bottom: 12px;
+    }
+
+    .live-preview {
+      width: 100%;
+      height: 100%;
+      display: none;
+      flex-direction: column;
+      text-align: left;
+    }
+
+    .animate-faded-zoom {
+      animation: cjFadeInZoom 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes cjFadeInZoom {
+      0% {
+        opacity: 0;
+        transform: scale(0.95);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .preview-image-container {
+      width: 100%;
+      height: 160px;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      position: relative;
+    }
+
+    .preview-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .preview-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+      margin-top: 16px;
+      line-height: 1.4;
+    }
+
+    .preview-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 12px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+    }
+
+    .preview-price {
+      font-size: 18px;
+      font-weight: bold;
+      color: var(--neon);
+    }
+
+    .preview-pid-badge {
+      background: var(--border);
+      color: var(--text-muted);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    /* FEEDBACK MESSAGES & TOASTS */
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      z-index: 1000;
+    }
+
+    .toast {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--primary);
+      padding: 16px;
+      border-radius: 6px;
+      color: #fff;
+      font-size: 13px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      min-width: 280px;
+    }
+
+    .toast--success {
+      border-left-color: var(--neon);
+    }
+
+    .toast--error {
+      border-left-color: var(--error);
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(100%) translateY(0); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    .loader {
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(255,255,255,0.1);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .sample-guides {
+      border-top: 1px solid var(--border);
+      padding-top: 16px;
+      margin-top: 12px;
+    }
+
+    .sample-pill {
+      display: inline-block;
+      margin: 4px 2px;
+      padding: 4px 8px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      cursor: pointer;
+      color: var(--text);
+    }
+
+    .sample-pill:hover {
+      background: var(--border);
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container" id="adminContainer">
+    <!-- HEADER -->
+    <div class="header" style="flex-direction: column; align-items: flex-start; gap: 16px; padding: 24px 32px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+        <a href="/admin.html" style="color: var(--text-muted); text-decoration: none; font-size: 12px; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.05em; transition: color 0.15s ease; cursor: pointer;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-muted)'">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg> Back to Dashboard
+        </a>
+        <button id="themeToggleBtn" aria-label="Toggle Theme" style="background: none; border: none; color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--border); transition: all 0.2s ease;">
+          <!-- Loaded dynamically -->
+        </button>
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-top: 4px;">
+        <div class="header-title-wrap">
+          <h1><span>Pawdrop</span> Importer</h1>
+          <p>Merchant CJDropshipping inventory syndication panel</p>
+        </div>
+        <div>
+          <span class="pill-badge" id="credentialsIndicator">SECURE PROXY (SSL)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN BODY -->
+    <div class="workspace">
+      <!-- FORM IMPORTER WRAPPER -->
+      <div class="importer-section">
+        <h4 class="section-label">Syndicate New Product</h4>
+        
+        <!-- Search bar -->
+        <div class="field-group">
+          <label class="field-label" for="productIdInput">CJ Dropshipping Product ID (PID)</label>
+          <div class="search-row">
+            <input type="text" id="productIdInput" class="input-field" placeholder="Enter CJ Product ID (PID)" required autocomplete="off">
+            <button class="btn" id="fetchProductBtn">
+              <span id="btnText">Fetch</span>
+              <span id="btnLoader" style="display: none;" class="loader"></span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Populated parameters form -->
+        <div style="display: flex; flex-direction: column; gap: 16px; margin-top: 12px;">
+          
+          <div class="field-group">
+            <div class="field-label-row">
+              <label class="field-label" for="productNameInput">Product Name</label>
+              <span class="field-badge readonly">Read Only</span>
+            </div>
+            <input type="text" id="productNameInput" class="input-field input-field--readonly" readonly placeholder="">
+          </div>
+
+          <div class="field-group">
+            <div class="field-label-row">
+              <label class="field-label" for="productImageInput">Image URL</label>
+              <span class="field-badge readonly">Read Only</span>
+            </div>
+            <input type="text" id="productImageInput" class="input-field input-field--readonly" readonly placeholder="">
+          </div>
+
+          <div class="field-group">
+            <div class="field-label-row">
+              <label class="field-label" for="productDescInput">Description Preview</label>
+              <span class="field-badge readonly">Read Only</span>
+            </div>
+            <textarea id="productDescInput" class="input-field input-field--readonly" readonly rows="4" placeholder=""></textarea>
+          </div>
+
+          <div class="field-group">
+            <div class="field-label-row">
+              <label class="field-label" for="productPriceInput">Merchandise Retail Price ($)</label>
+              <span class="field-badge editable">Editable</span>
+            </div>
+            <input type="number" step="0.01" id="productPriceInput" class="input-field" placeholder="0.00" disabled>
+          </div>
+
+          <div class="search-row" style="margin-top: 8px;">
+            <button class="btn btn--success" id="saveProductBtn" style="flex: 1;" disabled>
+              Save Product & Track Sync
+            </button>
+            <button class="btn btn--outline" id="clearFormBtn" style="flex: 0.4;">
+              Reset
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- VISUAL SIDEBAR PREVIEW -->
+      <div style="display: flex; flex-direction: column; gap: 20px;">
+        <h4 class="section-label">Real-Time Catalog Preview</h4>
+        
+        <div class="preview-section" id="previewContainer">
+          
+          <!-- Placeholder state -->
+          <div class="preview-placeholder" id="placeholderView">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg>
+            <p style="font-size: 13px;">Specify a product identity on the left to review the card preview.</p>
+          </div>
+
+          <!-- Parsed preview card state -->
+          <div class="live-preview" id="liveCardView">
+            <div class="preview-image-container">
+              <img id="cardImage" class="preview-image" src="" alt="Product view" referrerpolicy="no-referrer">
+            </div>
+            <h3 class="preview-title" id="cardTitle">Orthopedic Memory Foam Pet Bed</h3>
+            <p id="cardDesc" style="font-size: 13px; color: var(--text-muted); margin-top: 8px; line-height: 1.4; height: 55px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;"></p>
+            
+            <div class="preview-meta">
+              <span class="preview-pid-badge" id="cardPid">PID: -</span>
+              <span class="preview-price" id="cardPrice">$0.00</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- TOAST ALERTS CONTAINER -->
+  <div class="toast-container" id="toastBox"></div>
+
+  <!-- Isolated Frontend Code JS Import -->
+  <script src="script.js"></script>
+</body>
+</html>
